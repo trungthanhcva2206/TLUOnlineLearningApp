@@ -13,6 +13,21 @@
         android:theme="@style/Theme.TLULearningOnline"
         tools:targetApi="31">
         <activity
+            android:name=".SuaKhoaHocActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ThemBaiHocActivity"
+            android:exported="false" />
+        <activity
+            android:name=".TaoKhoaHocActivity"
+            android:exported="false" />
+        <activity
+            android:name=".QuanLyKhoaHocActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ChiTietBaiHocActivity"
+            android:exported="false" />
+        <activity
             android:name=".ChiTietKhoaHocActivity"
             android:exported="false" />
         <activity

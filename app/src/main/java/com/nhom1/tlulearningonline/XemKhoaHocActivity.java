@@ -2,6 +2,7 @@ package com.nhom1.tlulearningonline;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -94,11 +95,11 @@ public class XemKhoaHocActivity extends AppCompatActivity {
         LinearLayout wrapper = new LinearLayout(this);
         wrapper.setOrientation(LinearLayout.VERTICAL);
 
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-        params.setMargins(4, 4, 0, 32); // 24dp khoảng cách giữa các thẻ
+        int width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 345, getResources().getDisplayMetrics());
+        int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 220, getResources().getDisplayMetrics());
+
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(width, height);
+        params.setMargins(4, 4, 0, 32);
         wrapper.setLayoutParams(params);
         wrapper.addView(view);
 

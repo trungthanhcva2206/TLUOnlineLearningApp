@@ -1,5 +1,6 @@
 package com.nhom1.tlulearningonline;
 
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -55,7 +56,7 @@ public class ChiTietKhoaHocActivity extends AppCompatActivity {
 
         // Cài đặt RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        BaiHocAdapter adapter = new BaiHocAdapter(danhSachBaiHoc);
+        BaiHocAdapter adapter = new BaiHocAdapter(danhSachBaiHoc,ChiTietKhoaHocActivity.this);
         recyclerView.setAdapter(adapter);
 
         // Xử lý nút back

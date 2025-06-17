@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -75,73 +74,45 @@
             android:layout_marginTop="12dp"/>
     </LinearLayout>
 
-    <!-- NỘI DUNG SCROLL -->
+    <!-- Danh sách có thể cuộn -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="110dp"
-        android:layout_marginBottom="80dp"
+        android:layout_marginTop="140dp"
         android:paddingHorizontal="16dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="32dp"
+        android:paddingBottom="100dp"
         android:clipToPadding="false"
         android:scrollbars="none">
 
         <LinearLayout
-            android:id="@+id/layout_noi_dung"
+            android:id="@+id/layout_ds_khoa_hoc"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="16dp"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:layout_marginTop="16dp"
+            android:gravity="center_horizontal" >
 
-            <!-- Tiêu đề 1 -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Khóa học đã tham gia"
-                android:textStyle="bold"
-                android:textSize="18sp"
-                android:textColor="#000000"
-                android:paddingVertical="8dp" />
 
-            <!-- Danh sách dọc -->
-            <LinearLayout
-                android:id="@+id/layout_khoa_hoc_tham_gia"
-                android:layout_width="345dp"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="16dp"
-                android:gravity="center_horizontal" />
-
-            <!-- Tiêu đề 2 -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Khóa học đã lưu"
-                android:textStyle="bold"
-                android:textSize="18sp"
-                android:textColor="#000000"
-                android:paddingVertical="8dp"
-                android:layout_marginTop="24dp" />
-
-            <!-- Danh sách ngang -->
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:scrollbars="none"
-                android:overScrollMode="never">
-
-                <LinearLayout
-                    android:id="@+id/layout_khoa_hoc_da_luu"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingEnd="16dp"/>
-            </HorizontalScrollView>
         </LinearLayout>
     </ScrollView>
 
-    <!-- Bottom Navigation -->
+    <!-- Nút tạo khóa học -->
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/btn_tao_khoa_hoc"
+        android:layout_width="178dp"
+        android:layout_height="65dp"
+        android:layout_gravity="bottom|end"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="120dp"
+        android:text="+ Tạo khóa học"
+        android:textSize="20sp"
+        android:elevation="8dp"
+        android:radius="48dp"
+        app:backgroundTint="@color/blue_2"
+        android:textColor="@color/white" />
+
+    <!-- Thanh điều hướng -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
