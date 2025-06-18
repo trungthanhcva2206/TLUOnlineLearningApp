@@ -12,7 +12,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // Tự động chuyển sang XemKhoaHocActivity
-        Intent intent = new Intent(MainActivity.this, XemKhoaHocActivity.class);
+        Intent intent = new Intent(MainActivity.this, QuanLyKhoaHocActivity.class);
         startActivity(intent);
 
         // Kết thúc MainActivity để không quay lại được khi bấm nút back

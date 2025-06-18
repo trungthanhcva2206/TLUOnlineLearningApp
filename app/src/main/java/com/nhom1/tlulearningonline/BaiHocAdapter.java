@@ -1,5 +1,8 @@
 package com.nhom1.tlulearningonline;
 
+
+import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,9 +15,11 @@ import java.util.List;
 
 public class BaiHocAdapter extends RecyclerView.Adapter<BaiHocAdapter.BaiHocViewHolder> {
     private List<Lesson> danhSachBaiHoc; // Thay đổi từ List<String> thành List<Lesson>
+    private Context context;
 
-    public BaiHocAdapter(List<Lesson> danhSachBaiHoc) {
+    public BaiHocAdapter(List<Lesson> danhSachBaiHoc, Context context) {
         this.danhSachBaiHoc = danhSachBaiHoc;
+        this.context = context;
     }
 
     @NonNull
@@ -29,8 +34,16 @@ public class BaiHocAdapter extends RecyclerView.Adapter<BaiHocAdapter.BaiHocView
     public void onBindViewHolder(@NonNull BaiHocViewHolder holder, int position) {
         Lesson baiHoc = danhSachBaiHoc.get(position);
         holder.tvTieuDeBaiHoc.setText(baiHoc.getTitle());
-        holder.tvThoiLuong.setText(baiHoc.getDuration()); // Hiển thị thời lượng
+        holder.tvThoiLuong.setText(baiHoc.getDuration());
+
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, ChiTietBaiHocActivity.class);
+            intent.putExtra("tieuDe", baiHoc.getTitle());
+            context.startActivity(intent);
+        });
     }
+
+
 
     @Override
     public int getItemCount() {
