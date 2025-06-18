@@ -140,10 +140,10 @@ public class XemKhoaHocActivity extends AppCompatActivity {
         wrapper.setOrientation(LinearLayout.VERTICAL);
 
         int width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 345, getResources().getDisplayMetrics());
-        int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 260, getResources().getDisplayMetrics());
+        int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 220, getResources().getDisplayMetrics());
 
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(width, height);
-        params.setMargins(4, 4, 0, 32);
+        params.setMargins(4, 4, 4, 32);
         wrapper.setLayoutParams(params);
         wrapper.addView(view);
 
