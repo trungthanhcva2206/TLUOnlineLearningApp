@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.nhom1.tlulearningonlineapp.ui.dashbroad.HomeFragment"
+        android:label="Trang chủ" />
+
+    <fragment
+        android:id="@+id/courseFragment"
+        android:name="com.nhom1.tlulearningonlineapp.ui.course.CourseFragment"
+        android:label="Khóa học" />
+
+    <fragment
+        android:id="@+id/accountFragment"
+        android:name="com.nhom1.tlulearningonlineapp.ui.account.AccountFragment"
+        android:label="Tài khoản" >
+        <action
+            android:id="@+id/action_accountFragment_to_addAccountMethodFragment"
+            app:destination="@id/addAccountMethodFragment" />
+        <action
+            android:id="@+id/action_accountFragment_to_listAccountFragment"
+            app:destination="@id/listAccountFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/addAccountMethodFragment"
+        android:name="com.nhom1.tlulearningonlineapp.ui.account.AddAccountMethodFragment"
+        android:label="Thêm tài khoản" >
+        <action
+            android:id="@+id/action_addAccountMethodFragment_to_accountFragment"
+            app:destination="@id/accountFragment" />
+        <action
+            android:id="@+id/action_addAccountMethodFragment_to_addAccountManualFragment"
+            app:destination="@id/addAccountManualFragment" />
+        <action
+            android:id="@+id/action_addAccountMethodFragment_to_AddAccountFileFragment"
+            app:destination="@id/AddAccountFileFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/addAccountManualFragment"
+        android:name="com.nhom1.tlulearningonlineapp.ui.account.AddAccountManualFragment"
+        android:label="Danh sách tài khoản" >
+        <action
+            android:id="@+id/action_addAccountManualFragment_to_addAccountMethodFragment"
+            app:destination="@id/addAccountMethodFragment" />
+        <action
+            android:id="@+id/action_addAccountManualFragment_to_accountSuccessFragment"
+            app:destination="@id/accountSuccessFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/accountSuccessFragment"
+        android:name="com.nhom1.tlulearningonlineapp.ui.account.AccountSuccessFragment"
+        android:label="Danh sách tài khoản mới" >
+        <action
+            android:id="@+id/action_accountSuccessFragment_to_accountFragment"
+            app:destination="@id/accountFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/accountDetailFragment"
+        android:name="com.nhom1.tlulearningonlineapp.ui.account.AccountDetailFragment"
+        android:label="Chi tiết tài khoản" >
+        <action
+            android:id="@+id/action_accountDetailFragment_to_listAccountFragment"
+            app:destination="@id/listAccountFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/AddAccountFileFragment"
+        android:name="com.nhom1.tlulearningonlineapp.ui.account.AddAccountFileFragment"
+        android:label="Thêm tài khoản từ file" >
+        <action
+            android:id="@+id/action_AddAccountFileFragment_to_addAccountMethodFragment"
+            app:destination="@id/addAccountMethodFragment" />
+        <action
+            android:id="@+id/action_AddAccountFileFragment_to_accountSuccessFragment"
+            app:destination="@id/accountSuccessFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/listAccountFragment"
+        android:name="com.nhom1.tlulearningonlineapp.ui.account.ListAccountFragment"
+        android:label="Danh sách tài khoản" >
+        <action
+            android:id="@+id/action_listAccountFragment_to_accountDetailFragment"
+            app:destination="@id/accountDetailFragment" />
+        <action
+            android:id="@+id/action_listAccountFragment_to_accountFragment"
+            app:destination="@id/accountFragment" />
+    </fragment>
+
+</navigation>
