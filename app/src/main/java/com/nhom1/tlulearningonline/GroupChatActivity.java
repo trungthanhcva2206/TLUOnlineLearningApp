@@ -1,8 +1,10 @@
 package com.nhom1.tlulearningonline;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,6 +23,7 @@ public class GroupChatActivity extends AppCompatActivity {
     private ImageButton btnSend;
     private List<Message> messageList;
     private MessageAdapter adapter;
+    private ImageView btnBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +33,7 @@ public class GroupChatActivity extends AppCompatActivity {
         recyclerMessages = findViewById(R.id.recyclerMessages);
         etMessage = findViewById(R.id.etMessage);
         btnSend = findViewById(R.id.btnSend);
+        btnBack = findViewById(R.id.btnBack);
 
         messageList = new ArrayList<>();
         adapter = new MessageAdapter(messageList);
@@ -46,6 +50,11 @@ public class GroupChatActivity extends AppCompatActivity {
                 etMessage.setText("");
             }
         });
+
+        btnBack.setOnClickListener(v -> {
+            startActivity(new Intent(GroupChatActivity.this, MainActivity.class));
+            finish(); // đóng trang chat
+        });
     }
 
     private void seedDummyMessages() {
@@ -57,4 +66,5 @@ public class GroupChatActivity extends AppCompatActivity {
         messageList.add(new Message("Trung Thanh - 2251061885", "Hope you like it", false));
         messageList.add(new Message("Tôi", "Hello! Trung Thanh", true));
     }
+
 }

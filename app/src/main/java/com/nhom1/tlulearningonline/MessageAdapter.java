@@ -3,6 +3,7 @@ package com.nhom1.tlulearningonline;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -60,10 +61,12 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     static class LeftViewHolder extends RecyclerView.ViewHolder {
         TextView tvSender, tvMessage;
+        ImageView imgAvatar;
         LeftViewHolder(View itemView) {
             super(itemView);
             tvSender = itemView.findViewById(R.id.tvSender);
             tvMessage = itemView.findViewById(R.id.tvMessage);
+            imgAvatar = itemView.findViewById(R.id.imgAvatar);
         }
     }
 }

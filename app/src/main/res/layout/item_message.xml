@@ -1,27 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="8dp"
     android:orientation="horizontal"
+    android:padding="8dp"
     android:gravity="start">
 
-    <!-- Avatar bên trái -->
+    <!-- Avatar người gửi -->
     <ImageView
         android:id="@+id/imgAvatar"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_marginEnd="8dp"
         android:scaleType="centerCrop"
-        android:src="@drawable/profile"
+        android:src="@drawable/ic_user"
         android:background="@drawable/circle_background" />
 
+    <!-- Tên và nội dung tin nhắn -->
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/tvSender"
+            android:id="@+id/txtSender"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Tên người gửi"
@@ -29,14 +32,13 @@
             android:textSize="14sp" />
 
         <TextView
-            android:id="@+id/tvMessage"
+            android:id="@+id/txtMessage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="Nội dung tin nhắn"
             android:background="@drawable/bg_left"
             android:padding="10dp"
-            android:text="Tin nhắn mẫu"
-            android:textSize="14sp"
-            android:layout_marginTop="4dp" />
+            android:layout_marginTop="4dp"
+            android:textSize="14sp" />
     </LinearLayout>
 </LinearLayout>
-
