@@ -91,7 +91,6 @@
             android:id="@+id/layout_noi_dung"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="16dp"
             android:orientation="vertical">
 
             <TextView
