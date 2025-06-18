@@ -6,17 +6,17 @@
 
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.nhom1.tlulearningonlineapp.ui.dashbroad.HomeFragment"
+        android:name="com.nhom1.tlulearningonline.ui.dashbroad.HomeFragment"
         android:label="Trang chủ" />
 
     <fragment
         android:id="@+id/courseFragment"
-        android:name="com.nhom1.tlulearningonlineapp.ui.course.CourseFragment"
+        android:name="com.nhom1.tlulearningonline.ui.course.CourseFragment"
         android:label="Khóa học" />
 
     <fragment
         android:id="@+id/accountFragment"
-        android:name="com.nhom1.tlulearningonlineapp.ui.account.AccountFragment"
+        android:name="com.nhom1.tlulearningonline.ui.account.AccountFragment"
         android:label="Tài khoản" >
         <action
             android:id="@+id/action_accountFragment_to_addAccountMethodFragment"
@@ -27,7 +27,7 @@
     </fragment>
     <fragment
         android:id="@+id/addAccountMethodFragment"
-        android:name="com.nhom1.tlulearningonlineapp.ui.account.AddAccountMethodFragment"
+        android:name="com.nhom1.tlulearningonline.ui.account.AddAccountMethodFragment"
         android:label="Thêm tài khoản" >
         <action
             android:id="@+id/action_addAccountMethodFragment_to_accountFragment"
@@ -41,7 +41,7 @@
     </fragment>
     <fragment
         android:id="@+id/addAccountManualFragment"
-        android:name="com.nhom1.tlulearningonlineapp.ui.account.AddAccountManualFragment"
+        android:name="com.nhom1.tlulearningonline.ui.account.AddAccountManualFragment"
         android:label="Danh sách tài khoản" >
         <action
             android:id="@+id/action_addAccountManualFragment_to_addAccountMethodFragment"
@@ -52,7 +52,7 @@
     </fragment>
     <fragment
         android:id="@+id/accountSuccessFragment"
-        android:name="com.nhom1.tlulearningonlineapp.ui.account.AccountSuccessFragment"
+        android:name="com.nhom1.tlulearningonline.ui.account.AccountSuccessFragment"
         android:label="Danh sách tài khoản mới" >
         <action
             android:id="@+id/action_accountSuccessFragment_to_accountFragment"
@@ -60,7 +60,7 @@
     </fragment>
     <fragment
         android:id="@+id/accountDetailFragment"
-        android:name="com.nhom1.tlulearningonlineapp.ui.account.AccountDetailFragment"
+        android:name="com.nhom1.tlulearningonline.ui.account.AccountDetailFragment"
         android:label="Chi tiết tài khoản" >
         <action
             android:id="@+id/action_accountDetailFragment_to_listAccountFragment"
@@ -68,7 +68,7 @@
     </fragment>
     <fragment
         android:id="@+id/AddAccountFileFragment"
-        android:name="com.nhom1.tlulearningonlineapp.ui.account.AddAccountFileFragment"
+        android:name="com.nhom1.tlulearningonline.ui.account.AddAccountFileFragment"
         android:label="Thêm tài khoản từ file" >
         <action
             android:id="@+id/action_AddAccountFileFragment_to_addAccountMethodFragment"
@@ -79,7 +79,7 @@
     </fragment>
     <fragment
         android:id="@+id/listAccountFragment"
-        android:name="com.nhom1.tlulearningonlineapp.ui.account.ListAccountFragment"
+        android:name="com.nhom1.tlulearningonline.ui.account.ListAccountFragment"
         android:label="Danh sách tài khoản" >
         <action
             android:id="@+id/action_listAccountFragment_to_accountDetailFragment"
@@ -88,5 +88,6 @@
             android:id="@+id/action_listAccountFragment_to_accountFragment"
             app:destination="@id/accountFragment" />
     </fragment>
+
 
 </navigation>
