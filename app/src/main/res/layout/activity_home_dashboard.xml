@@ -4,17 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F0F2F5"
-    tools:context=".MainActivity">
+    android:background="@color/black"
+    tools:context=".HomeActivity">
 
-    <!-- HEADER: Lời chào, thông báo, avatar và thanh tìm kiếm -->
-    <!-- Đã bọc header trong AppBarLayout để app:layout_behavior hoạt động đúng -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#FFFFFF"
         android:elevation="4dp"
+        android:layout_marginTop="32dp"
         app:liftOnScroll="true">
 
         <LinearLayout
@@ -23,7 +22,6 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Hàng trên cùng: Lời chào, Tên người dùng, Chuông thông báo, Avatar -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
