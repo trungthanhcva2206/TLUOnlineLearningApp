@@ -80,7 +80,7 @@ public class LoginActivity extends AppCompatActivity {
             if (email.equals("student@tlu.edu.vn") && password.equals("password123")) {
                 showProgress(false);
                 Toast.makeText(LoginActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(LoginActivity.this, MainActivity.class); // Replace MainActivity with your actual homepage activity
+                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                 startActivity(intent);
                 finish();
             } else if (email.equals("lecturer@tlu.edu.vn") && password.equals("password123")) {

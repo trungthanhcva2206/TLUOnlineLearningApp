@@ -94,7 +94,7 @@ public class XemKhoaHocActivity extends AppCompatActivity {
     }
 
     private View createCard(KhoaHoc kh, boolean daLuu, int position) {
-        View view = LayoutInflater.from(this).inflate(R.layout.item_khoa_hoc_sv, null);
+        View view = LayoutInflater.from(this).inflate(R.layout.item_khoa_hoc_sv_blue, null);
 
         // Đổi màu nền
         CardView cardView = (CardView) view;
