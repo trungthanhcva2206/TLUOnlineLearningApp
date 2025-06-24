@@ -10,13 +10,10 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
-// import android.view.LayoutInflater; // Không cần nếu Adapter nằm ngoài
-// import android.view.ViewGroup;     // Không cần nếu Adapter nằm ngoài
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-// import android.widget.Button; // Không cần nếu chỉ dùng trong Adapter
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -43,7 +40,7 @@ public class HomeActivity extends AppCompatActivity {
     private ImageView ivNotification, ivAvatar;
     private ImageView ivSeeMoreCourses, ivSeeMoreLecturers;
     private RecyclerView recyclerFeaturedCourses, recyclerInProgressCourses, recyclerTeachers;
-    private FeaturedCoursesAdapter featuredCoursesAdapter;
+    private TopCourseAdapter featuredCoursesAdapter;
     private FeaturedCoursesAdapter inProgressCoursesAdapter;
     private TeachersAdapter teachersAdapter;
     private List<CourseItem> featuredCoursesList = new ArrayList<>();
@@ -138,11 +135,13 @@ public class HomeActivity extends AppCompatActivity {
         fetchUserInfo();
         setupSessionCheck();
 
-        featuredCoursesAdapter = new FeaturedCoursesAdapter(featuredCoursesList);
+        // Use TopCourseAdapter for featured courses (no progress bar)
+        featuredCoursesAdapter = new TopCourseAdapter(featuredCoursesList); // CHANGED HERE
         LinearLayoutManager featuredCoursesLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         recyclerFeaturedCourses.setLayoutManager(featuredCoursesLayoutManager);
         recyclerFeaturedCourses.setAdapter(featuredCoursesAdapter);
 
+        // Use FeaturedCoursesAdapter for in-progress courses (with progress bar)
         inProgressCoursesAdapter = new FeaturedCoursesAdapter(inProgressCoursesList);
         LinearLayoutManager inProgressCoursesLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         recyclerInProgressCourses.setLayoutManager(inProgressCoursesLayoutManager);
@@ -182,22 +181,16 @@ public class HomeActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 int itemId = item.getItemId();
                 if (itemId == R.id.nav_home) {
-                    // Already on Home, do nothing
                     return true;
                 } else if (itemId == R.id.nav_forum) {
-                    Intent intent = new Intent(HomeActivity.this, GroupChatActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT); // Reorder existing activity
-                    startActivity(intent);
+                    startActivity(new Intent(HomeActivity.this, GroupChatActivity.class));
                     return true;
                 } else if (itemId == R.id.nav_courses) {
-                    Intent intent = SessionManager.getCoursesActivityIntent(HomeActivity.this); // Use helper
-                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                    startActivity(intent);
+                    startActivity(new Intent(HomeActivity.this, XemKhoaHocActivity.class));
                     return true;
                 } else if (itemId == R.id.nav_profile) {
-                    Intent intent = new Intent(HomeActivity.this, UserProfileActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                    startActivity(intent);
+                    startActivity(new Intent(HomeActivity.this, UserProfileActivity.class));
+                    // finish();
                     return true;
                 }
                 return false;

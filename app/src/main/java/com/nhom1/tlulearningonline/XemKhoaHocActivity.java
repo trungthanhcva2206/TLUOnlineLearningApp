@@ -12,11 +12,13 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Button; // Import Button to use btnSoBaiHoc
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
+import android.widget.ProgressBar; // Import ProgressBar
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -71,32 +73,21 @@ public class XemKhoaHocActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        // --- XỬ LÝ THANH ĐIỀU HƯỚNG DƯỚI CÙNG ---
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 int itemId = item.getItemId();
                 if (itemId == R.id.nav_home) {
-                    Intent intent = new Intent(XemKhoaHocActivity.this, HomeActivity.class); // Assuming student home is default
-                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                    startActivity(intent);
-                    // finish(); // Remove finish() here unless you explicitly want to remove the current activity from stack
+                    startActivity(new Intent(XemKhoaHocActivity.this, HomeActivity.class));
                     return true;
                 } else if (itemId == R.id.nav_forum) {
-                    Intent intent = new Intent(XemKhoaHocActivity.this, GroupChatActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                    startActivity(intent);
-                    // finish();
+                    startActivity(new Intent(XemKhoaHocActivity.this, GroupChatActivity.class));
                     return true;
                 } else if (itemId == R.id.nav_courses) {
-                    Intent intent = SessionManager.getCoursesActivityIntent(XemKhoaHocActivity.this); // Use helper
-                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                    startActivity(intent);
-                    // finish();
                     return true;
                 } else if (itemId == R.id.nav_profile) {
-                    Intent intent = new Intent(XemKhoaHocActivity.this, UserProfileActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                    startActivity(intent);
+                    startActivity(new Intent(XemKhoaHocActivity.this, UserProfileActivity.class));
                     // finish();
                     return true;
                 }
@@ -111,10 +102,12 @@ public class XemKhoaHocActivity extends AppCompatActivity {
         layoutDaLuu.removeAllViews();
 
         for (int i = 0; i < khoaHocThamGia.size(); i++) {
+            // For "Khóa học đã tham gia", daLuu is false, so it will inflate item_khoa_hoc_sv_progress
             layoutThamGia.addView(createCard(khoaHocThamGia.get(i), false, i));
         }
 
         for (int i = 0; i < khoaHocDaLuu.size(); i++) {
+            // For "Khóa học đã lưu", daLuu is true, so it will inflate item_khoa_hoc_sv
             layoutDaLuu.addView(createCard(khoaHocDaLuu.get(i), true, i));
         }
     }
@@ -125,8 +118,9 @@ public class XemKhoaHocActivity extends AppCompatActivity {
         int dem = 0;
         for (int i = 0; i < khoaHocThamGia.size(); i++) {
             KhoaHoc kh = khoaHocThamGia.get(i);
+            // Search only affects "Khóa học đã tham gia"
             if (kh.ten.toLowerCase().contains(tuKhoa.toLowerCase())) {
-                layoutThamGia.addView(createCard(kh, false, i));
+                layoutThamGia.addView(createCard(kh, false, i)); // Use item_khoa_hoc_sv_progress
                 dem++;
             }
         }
@@ -139,21 +133,55 @@ public class XemKhoaHocActivity extends AppCompatActivity {
     }
 
     private View createCard(KhoaHoc kh, boolean daLuu, int position) {
-        View view = LayoutInflater.from(this).inflate(R.layout.item_khoa_hoc_sv, null);
+        View view;
+        TextView txtTenKhoaHoc;
+        TextView txtGiangVien;
+        TextView txtBoMon;
+        ImageView btnSave;
+        CardView cardView; // Declare CardView here
 
-        // Đổi màu nền
-        CardView cardView = (CardView) view;
+        if (!daLuu) { // For "Khóa học đã tham gia" -> use item_khoa_hoc_sv_progress
+            view = LayoutInflater.from(this).inflate(R.layout.item_khoa_hoc_sv_progress, null);
+            txtTenKhoaHoc = view.findViewById(R.id.txt_ten_khoa_hoc);
+            txtGiangVien = view.findViewById(R.id.txt_giang_vien);
+            txtBoMon = view.findViewById(R.id.txt_bo_mon);
+            btnSave = view.findViewById(R.id.btn_save);
+
+            ProgressBar progressBar = view.findViewById(R.id.progress_bar);
+            TextView txtTienDo = view.findViewById(R.id.txt_tien_do);
+
+            txtTenKhoaHoc.setText(kh.ten);
+            txtGiangVien.setText(kh.giangVien);
+            txtBoMon.setText(kh.boMon);
+            progressBar.setProgress(kh.tienDo);
+            txtTienDo.setText(kh.tienDo + "%");
+
+        } else { // For "Khóa học đã lưu" -> use item_khoa_hoc_sv
+            view = LayoutInflater.from(this).inflate(R.layout.item_khoa_hoc_sv, null);
+            txtTenKhoaHoc = view.findViewById(R.id.txt_ten_khoa_hoc);
+            txtGiangVien = view.findViewById(R.id.txt_giang_vien);
+            txtBoMon = view.findViewById(R.id.txt_bo_mon);
+            Button btnSoBaiHoc = view.findViewById(R.id.btn_so_bai_hoc); // Specific to item_khoa_hoc_sv
+            btnSave = view.findViewById(R.id.btn_save);
+
+            txtTenKhoaHoc.setText(kh.ten);
+            txtGiangVien.setText(kh.giangVien);
+            txtBoMon.setText(kh.boMon);
+            btnSoBaiHoc.setText(kh.soBaiHoc + " bài học");
+        }
+
+        cardView = (CardView) view; // Cast the inflated view to CardView
+
+        // Set alternating background colors
         int colorId = (position % 2 == 0) ? R.color.blue_3 : R.color.blue;
         cardView.setCardBackgroundColor(ContextCompat.getColor(this, colorId));
 
-        CustomViewBinderSV.bind(view, kh);
-
-        ImageView btnSave = view.findViewById(R.id.btn_save);
+        // Set star icon (common to both)
         btnSave.setImageResource(daLuu ? R.drawable.ic_star_filled : R.drawable.ic_star_border);
 
         btnSave.setOnClickListener(v -> {
             if (daLuu) {
-                layoutDaLuu.removeView((View) view.getParent());
+                layoutDaLuu.removeView((View) v.getParent().getParent().getParent()); // Correctly remove the wrapper view
                 khoaHocDaLuu.remove(kh);
             } else {
                 khoaHocDaLuu.add(kh);
