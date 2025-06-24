@@ -5,25 +5,26 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Patterns;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.material.textfield.TextInputEditText;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private TextInputEditText etEmail, etPassword;
+    private TextInputEditText etUsername, etPassword;
     private Button btnLogin;
     private TextView tvForgotPassword;
-
-    // A map to store dummy accounts: email -> password
-    private Map<String, String> testAccounts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,69 +32,28 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         // Initialize UI elements
-        etEmail = findViewById(R.id.et_email);
+        etUsername = findViewById(R.id.et_username); // ID vẫn là et_email trong layout
         etPassword = findViewById(R.id.et_password);
         btnLogin = findViewById(R.id.btn_login);
         tvForgotPassword = findViewById(R.id.tv_forgot_password);
 
-        // Setup dummy test accounts
-        setupTestAccounts();
+        btnLogin.setOnClickListener(v -> attemptLogin());
 
-        // Set click listener for login button
-        btnLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                attemptLogin();
-            }
-        });
-
-        // Set click listener for forgot password text
-        tvForgotPassword.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(LoginActivity.this, "Chức năng quên mật khẩu đang được phát triển!", Toast.LENGTH_SHORT).show();
-                // In a real app, you would navigate to a password reset activity
-            }
-        });
+        tvForgotPassword.setOnClickListener(v ->
+                Toast.makeText(LoginActivity.this, "Chức năng quên mật khẩu đang được phát triển!", Toast.LENGTH_SHORT).show()
+        );
     }
 
-    /**
-     * Sets up a map of dummy test accounts for login validation.
-     * Includes both student and lecturer accounts.
-     */
-    private void setupTestAccounts() {
-        testAccounts = new HashMap<>();
-        // Student accounts with format: studentID@e.tlu.edu.vn
-        testAccounts.put("2251161942@e.tlu.edu.vn", "password123");
-        testAccounts.put("2251061708@e.tlu.edu.vn", "password123"); // Example student ID from doc
-        testAccounts.put("2251061885@e.tlu.edu.vn", "password123"); // Example student ID from doc
-        testAccounts.put("2251061712@e.tlu.edu.vn", "password123"); // Example student ID from doc
-        testAccounts.put("sv.test@e.tlu.edu.vn", "svpass"); // Another student test account
-
-        // Lecturer accounts
-        testAccounts.put("lecturer@tlu.edu.vn", "password123");
-        testAccounts.put("gv.test@tlu.edu.vn", "gvpass"); // Another lecturer test account
-    }
-
-
-    /**
-     * Attempts to sign in the account specified by the login form.
-     * If there are form errors (invalid email, missing fields, etc.), the
-     * errors are presented and no actual login attempt is made.
-     */
     private void attemptLogin() {
-        // Reset errors
-        etEmail.setError(null);
+        etUsername.setError(null);
         etPassword.setError(null);
 
-        // Store values at the time of the login attempt.
-        String email = etEmail.getText().toString().trim();
+        String username = etUsername.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
 
         boolean cancel = false;
         View focusView = null;
 
-        // Check for a valid password, if the user entered one.
         if (TextUtils.isEmpty(password)) {
             etPassword.setError("Mật khẩu không được để trống.");
             focusView = etPassword;
@@ -104,88 +64,102 @@ public class LoginActivity extends AppCompatActivity {
             cancel = true;
         }
 
-        // Check for a valid email address.
-        if (TextUtils.isEmpty(email)) {
-            etEmail.setError("Email không được để trống.");
-            focusView = etEmail;
-            cancel = true;
-        } else if (!isValidEmailFormat(email)) { // Use new validation for email format
-            etEmail.setError("Email không hợp lệ (ví dụ: student@e.tlu.edu.vn hoặc lecturer@tlu.edu.vn).");
-            focusView = etEmail;
+        if (TextUtils.isEmpty(username)) {
+            etUsername.setError("Tên đăng nhập không được để trống.");
+            focusView = etUsername;
             cancel = true;
         }
 
         if (cancel) {
-            // There was an error; don't attempt login and focus the first
-            // form field with an error.
             focusView.requestFocus();
         } else {
-            // Simulate a login attempt using the testAccounts map
-            showProgress(true); // You'd implement a loading spinner or similar
-
-            // Check if the entered email and password match any test account
-            if (testAccounts.containsKey(email) && testAccounts.get(email).equals(password)) {
-                showProgress(false);
-                Toast.makeText(LoginActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-
-                // Determine user role based on email domain
-                if (email.endsWith("@e.tlu.edu.vn")) {
-                    Toast.makeText(LoginActivity.this, "Đăng nhập với vai trò Sinh viên", Toast.LENGTH_SHORT).show();
-                    // Navigate to MainActivity or a student-specific dashboard
-                    Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-                    startActivity(intent);
-                    finish(); // Close login activity
-                } else if (email.endsWith("@tlu.edu.vn")) {
-                    Toast.makeText(LoginActivity.this, "Đăng nhập với vai trò Giảng viên", Toast.LENGTH_SHORT).show();
-                    // Navigate to MainActivity or a lecturer-specific dashboard
-                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                    startActivity(intent);
-                    finish(); // Close login activity
-                } //else {
-//                    // Fallback for other valid domains if any, or a general success
-//                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-//                    startActivity(intent);
-//                    finish();
-//                }
-
-            } else {
-                showProgress(false);
-                etPassword.setError("Email hoặc mật khẩu không đúng.");
-                focusView = etEmail;
-                focusView.requestFocus();
-            }
+            showProgress(true);
+            loginWithAPI(username, password);
         }
     }
 
-    /**
-     * Checks if the email format is valid (e.g., contains @ and ends with specific domains).
-     * @param email The email string to validate.
-     * @return True if the email has a valid format, false otherwise.
-     */
-    private boolean isValidEmailFormat(String email) {
-        // Use Android's Patterns.EMAIL_ADDRESS for basic email format validation
-        // And then check for specific domains as per your requirement
-        return Patterns.EMAIL_ADDRESS.matcher(email).matches() &&
-                (email.endsWith("@e.tlu.edu.vn") || email.endsWith("@tlu.edu.vn"));
+    private void loginWithAPI(String username, String password) {
+        String url = "http://14.225.207.221:6060/mobile/auth/log-in";
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+
+        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
+                response -> {
+                    showProgress(false);
+                    Log.d("LOGIN", "Response: " + response);
+                    try {
+                        JSONObject json = new JSONObject(response);
+                        int code = json.getInt("code");
+                        Log.d("LOGIN", "Code: " + code);
+
+                        if (code == 0) {
+                            JSONObject result = json.getJSONObject("result");
+                            boolean authenticated = result.getBoolean("authenticated");
+                            String role = result.optString("role", "");
+                            String status = result.optString("status", "");
+                            Log.d("LOGIN", "Authenticated: " + authenticated + ", Role: " + role);
+
+                            if (!"ACTIVE".equalsIgnoreCase(status)) {
+                                Toast.makeText(this, "Tài khoản của bạn đã bị vô hiệu hóa!", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            if (authenticated) {
+                                String userId = result.optString("id", "");
+                                SessionManager sessionManager = new SessionManager(this);
+                                sessionManager.saveLogin(userId);
+                                Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+                                Intent intent;
+
+                                if ("TEACHER".equalsIgnoreCase(role)) {
+                                    intent = new Intent(this, QuanLyKhoaHocActivity.class);
+                                } else {
+                                    intent = new Intent(this, HomeActivity.class);
+                                }
+
+                                startActivity(intent);
+                                finish();
+                            } else {
+                                Toast.makeText(this, "Tên đăng nhập hoặc mật khẩu không đúng!", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Toast.makeText(this, "Đăng nhập thất bại. Mã lỗi: " + code, Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(this, "Lỗi khi xử lý phản hồi!", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                error -> {
+                    showProgress(false);
+                    Log.e("LOGIN", "Volley Error: " + error.toString());
+                    Toast.makeText(this, "Lỗi kết nối đến server!", Toast.LENGTH_SHORT).show();
+                }) {
+            @Override
+            public byte[] getBody() {
+                JSONObject params = new JSONObject();
+                try {
+                    params.put("username", username);
+                    params.put("password", password);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                return params.toString().getBytes();
+            }
+
+            @Override
+            public String getBodyContentType() {
+                return "application/json; charset=utf-8";
+            }
+        };
+
+        queue.add(postRequest);
     }
 
-    /**
-     * Checks if the password meets the minimum length requirement.
-     * @param password The password string to validate.
-     * @return True if the password length is greater than 4, false otherwise.
-     */
     private boolean isPasswordValid(String password) {
-        // You can define more robust password complexity rules here
-        return password.length() > 4; // Example: password must be greater than 4 characters
+        return password.length() > 7;
     }
 
-    /**
-     * Shows or hides a progress indicator (currently a Toast message).
-     * @param show True to show progress, false to hide.
-     */
     private void showProgress(boolean show) {
-        // Implement a progress bar or spinner here to show/hide loading state
-        // For now, it's just a placeholder Toast
         if (show) {
             Toast.makeText(this, "Đang đăng nhập...", Toast.LENGTH_SHORT).show();
         }
