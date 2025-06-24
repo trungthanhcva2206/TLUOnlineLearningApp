@@ -153,7 +153,10 @@ public class HomeActivity extends AppCompatActivity {
         recyclerTeachers.setAdapter(teachersAdapter);
 
         ivNotification.setOnClickListener(v -> Toast.makeText(HomeActivity.this, "Thông báo!", Toast.LENGTH_SHORT).show());
-        ivAvatar.setOnClickListener(v -> Toast.makeText(HomeActivity.this, "Mở Hồ sơ cá nhân!", Toast.LENGTH_SHORT).show());
+        ivAvatar.setOnClickListener(v -> {
+            Intent intent = new Intent(HomeActivity.this, UserProfileActivity.class);
+            startActivity(intent);
+        });
 
         edtSearch.addTextChangedListener(new TextWatcher() {
             @Override
@@ -169,7 +172,8 @@ public class HomeActivity extends AppCompatActivity {
         });
 
         ivSeeMoreLecturers.setOnClickListener(v -> { // "Xem thêm giảng viên"
-            Toast.makeText(HomeActivity.this, "Xem thêm giảng viên", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(HomeActivity.this, DanhSachGiangVienActivity.class);
+            startActivity(intent);
         });
 
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
