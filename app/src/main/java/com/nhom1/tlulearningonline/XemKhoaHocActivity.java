@@ -6,15 +6,19 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
 
@@ -26,17 +30,23 @@ public class XemKhoaHocActivity extends AppCompatActivity {
 
     EditText edtTimKiem;
     TextView tvKhongTimThay;
+    private ImageView ivAvatar;
+
+    private BottomNavigationView bottomNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_xem_khoa_hoc);
+        // Trong HomeActivity.java và UserProfileActivity.java
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         // Khởi tạo view sau khi setContentView
         layoutThamGia = findViewById(R.id.layout_khoa_hoc_tham_gia);
         layoutDaLuu = findViewById(R.id.layout_khoa_hoc_da_luu);
         edtTimKiem = findViewById(R.id.edt_tim_kiem);
         tvKhongTimThay = findViewById(R.id.tv_khong_tim_thay);
+        ivAvatar = findViewById(R.id.iv_avatar);
 
         // Dữ liệu mẫu
         khoaHocThamGia.add(new KhoaHoc("Tương tác người máy", "GV: Nguyễn Thị Thu Hương", "Bộ môn Công nghệ phần mềm", 80));
@@ -59,6 +69,35 @@ public class XemKhoaHocActivity extends AppCompatActivity {
                 timKiemKhoaHoc(s.toString());
             }
         });
+
+        ivAvatar.setOnClickListener(v -> {
+            Intent intent = new Intent(XemKhoaHocActivity.this, UserProfileActivity.class);
+            startActivity(intent);
+        });
+
+        // --- XỬ LÝ THANH ĐIỀU HƯỚNG DƯỚI CÙNG ---
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                int itemId = item.getItemId();
+                if (itemId == R.id.nav_home) {
+                    startActivity(new Intent(XemKhoaHocActivity.this, HomeActivity.class));
+                    return true;
+                } else if (itemId == R.id.nav_forum) {
+                    startActivity(new Intent(XemKhoaHocActivity.this, GroupChatActivity.class));
+                    return true;
+                } else if (itemId == R.id.nav_courses) {
+                    return true;
+                } else if (itemId == R.id.nav_profile) {
+                    startActivity(new Intent(XemKhoaHocActivity.this, UserProfileActivity.class));
+                    // finish();
+                    return true;
+                }
+                return false;
+            }
+        });
+        // Chọn mục "Trang chủ" mặc định khi activity khởi động
+        bottomNavigationView.setSelectedItemId(R.id.nav_courses);
     }
 
     private void hienThiKhoaHoc() {

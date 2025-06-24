@@ -167,7 +167,10 @@ public class HomeActivity extends AppCompatActivity { // Đã đổi tên lớp 
 
         // --- XỬ LÝ TƯƠNG TÁC Ở HEADER ---
         ivNotification.setOnClickListener(v -> Toast.makeText(HomeActivity.this, "Thông báo!", Toast.LENGTH_SHORT).show());
-        ivAvatar.setOnClickListener(v -> Toast.makeText(HomeActivity.this, "Mở Hồ sơ cá nhân!", Toast.LENGTH_SHORT).show());
+        ivAvatar.setOnClickListener(v -> {
+            Intent intent = new Intent(HomeActivity.this, UserProfileActivity.class);
+            startActivity(intent);
+        });
 
         edtSearch.addTextChangedListener(new TextWatcher() {
             @Override
@@ -193,7 +196,8 @@ public class HomeActivity extends AppCompatActivity { // Đã đổi tên lớp 
         // Nếu bạn muốn có nút xem thêm cho khóa học đang học, bạn cần thêm ImageView với ID đó vào XML.
 
         ivSeeMoreLecturers.setOnClickListener(v -> { // "Xem thêm giảng viên"
-            Toast.makeText(HomeActivity.this, "Xem thêm giảng viên", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(HomeActivity.this, DanhSachGiangVienActivity.class);
+            startActivity(intent);
         });
 
 

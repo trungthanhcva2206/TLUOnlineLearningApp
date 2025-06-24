@@ -3,9 +3,11 @@ package com.nhom1.tlulearningonline;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -13,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.nhom1.tlulearningonline.KhoaHocAdapter;
 import com.nhom1.tlulearningonline.KhoaHoc;
 
@@ -23,17 +26,24 @@ public class ChiTietGiangVienActivity extends AppCompatActivity {
     private RecyclerView recyclerKhoaHoc;
     private KhoaHocAdapter adapter;
     private List<KhoaHoc> khoaHocList;
+    private ImageView ivAvatar;
+
+    private BottomNavigationView bottomNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chi_tiet_giang_vien);
 
+        // Trong HomeActivity.java và UserProfileActivity.java
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
+
         btnBack = findViewById(R.id.btn_back);
         tvTenGv = findViewById(R.id.tv_ten_gv);
         tvBoMon = findViewById(R.id.tv_bo_mon);
         tvEmail = findViewById(R.id.tv_email);
         recyclerKhoaHoc = findViewById(R.id.recycler_khoa_hoc);
+        ivAvatar = findViewById(R.id.iv_avatar);
 
         Intent intent = getIntent();
         String ten = intent.getStringExtra("ten");
@@ -58,5 +68,36 @@ public class ChiTietGiangVienActivity extends AppCompatActivity {
         adapter = new KhoaHocAdapter(khoaHocList);
         recyclerKhoaHoc.setLayoutManager(new LinearLayoutManager(this));
         recyclerKhoaHoc.setAdapter(adapter);
+
+        ivAvatar.setOnClickListener(v -> {
+            Intent intent1 = new Intent(ChiTietGiangVienActivity.this, UserProfileActivity.class);
+            startActivity(intent1);
+        });
+
+
+        // --- XỬ LÝ THANH ĐIỀU HƯỚNG DƯỚI CÙNG ---
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                int itemId = item.getItemId();
+                if (itemId == R.id.nav_home) {
+                    startActivity(new Intent(ChiTietGiangVienActivity.this, HomeActivity.class));
+                    return true;
+                } else if (itemId == R.id.nav_forum) {
+                    startActivity(new Intent(ChiTietGiangVienActivity.this, GroupChatActivity.class));
+                    return true;
+                } else if (itemId == R.id.nav_courses) {
+                    startActivity(new Intent(ChiTietGiangVienActivity.this, XemKhoaHocActivity.class));
+                    return true;
+                } else if (itemId == R.id.nav_profile) {
+                    startActivity(new Intent(ChiTietGiangVienActivity.this, UserProfileActivity.class));
+                    // finish();
+                    return true;
+                }
+                return false;
+            }
+        });
+        // Chọn mục "Trang chủ" mặc định khi activity khởi động
+
     }
 }

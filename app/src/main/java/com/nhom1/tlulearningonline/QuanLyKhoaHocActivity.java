@@ -6,17 +6,21 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
 
@@ -28,6 +32,8 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
     private LinearLayout layoutDsKhoaHoc;
     private final ArrayList<KhoaHoc> danhSach = new ArrayList<>();
     private int viTriDangSua = -1;
+
+    private BottomNavigationView bottomNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +60,30 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
             Intent intent = new Intent(QuanLyKhoaHocActivity.this, TaoKhoaHocActivity.class);
             startActivityForResult(intent, REQUEST_TAO_KHOA_HOC);
         });
+
+        // --- XỬ LÝ THANH ĐIỀU HƯỚNG DƯỚI CÙNG ---
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                int itemId = item.getItemId();
+                if (itemId == R.id.nav_home) {
+                    startActivity(new Intent(QuanLyKhoaHocActivity.this, HomeActivity.class));
+                    return true;
+                } else if (itemId == R.id.nav_forum) {
+                    startActivity(new Intent(QuanLyKhoaHocActivity.this, GroupChatActivity.class));
+                    return true;
+                } else if (itemId == R.id.nav_courses) {
+                    return true;
+                } else if (itemId == R.id.nav_profile) {
+                    startActivity(new Intent(QuanLyKhoaHocActivity.this, UserProfileActivity.class));
+                    // finish();
+                    return true;
+                }
+                return false;
+            }
+        });
+        // Chọn mục "Trang chủ" mặc định khi activity khởi động
+        bottomNavigationView.setSelectedItemId(R.id.nav_courses);
     }
 
     private void addKhoaHocToLayout(KhoaHoc kh, int position) {

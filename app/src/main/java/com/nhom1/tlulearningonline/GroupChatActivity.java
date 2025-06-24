@@ -3,11 +3,13 @@ package com.nhom1.tlulearningonline;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -15,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import org.json.JSONObject;
 
@@ -34,10 +37,15 @@ public class GroupChatActivity extends AppCompatActivity {
     private static final String USER_URL = "http://14.225.207.221:6060/mobile/users";
     private String currentUserId;
 
+    private BottomNavigationView bottomNavigationView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group_chat);
+
+        // Trong HomeActivity.java và UserProfileActivity.java
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         recyclerMessages = findViewById(R.id.recyclerMessages);
         etMessage = findViewById(R.id.etMessage);
@@ -65,9 +73,33 @@ public class GroupChatActivity extends AppCompatActivity {
         });
 
         btnBack.setOnClickListener(v -> {
-            startActivity(new Intent(GroupChatActivity.this, MainActivity.class));
+            startActivity(new Intent(GroupChatActivity.this, HomeActivity.class));
             finish();
         });
+
+        // --- XỬ LÝ THANH ĐIỀU HƯỚNG DƯỚI CÙNG ---
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                int itemId = item.getItemId();
+                if (itemId == R.id.nav_home) {
+                    startActivity(new Intent(GroupChatActivity.this, HomeActivity.class));
+                    return true;
+                } else if (itemId == R.id.nav_forum) {
+                    return true;
+                } else if (itemId == R.id.nav_courses) {
+                    startActivity(new Intent(GroupChatActivity.this, XemKhoaHocActivity.class));
+                    return true;
+                } else if (itemId == R.id.nav_profile) {
+                    startActivity(new Intent(GroupChatActivity.this, UserProfileActivity.class));
+                    // finish();
+                    return true;
+                }
+                return false;
+            }
+        });
+        // Chọn mục "Trang chủ" mặc định khi activity khởi động
+        bottomNavigationView.setSelectedItemId(R.id.nav_forum);
     }
 
     private void startFetchingMessagesLoop() {

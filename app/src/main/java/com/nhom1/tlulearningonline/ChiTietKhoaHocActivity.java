@@ -3,13 +3,17 @@ package com.nhom1.tlulearningonline;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
 
@@ -18,10 +22,15 @@ public class ChiTietKhoaHocActivity extends AppCompatActivity {
     RecyclerView recyclerView;
     ImageView btnBack;
 
+    private BottomNavigationView bottomNavigationView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chi_tiet_khoa_hoc);
+
+        // Trong HomeActivity.java và UserProfileActivity.java
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         // Ánh xạ
         tvTieuDe = findViewById(R.id.tv_course_name);
@@ -66,5 +75,30 @@ public class ChiTietKhoaHocActivity extends AppCompatActivity {
                 finish(); // Đóng activity hiện tại và quay lại
             }
         });
+
+        // --- XỬ LÝ THANH ĐIỀU HƯỚNG DƯỚI CÙNG ---
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                int itemId = item.getItemId();
+                if (itemId == R.id.nav_home) {
+                    startActivity(new Intent(ChiTietKhoaHocActivity.this, HomeActivity.class));
+                    return true;
+                } else if (itemId == R.id.nav_forum) {
+                    startActivity(new Intent(ChiTietKhoaHocActivity.this, GroupChatActivity.class));
+                    return true;
+                } else if (itemId == R.id.nav_courses) {
+                    startActivity(new Intent(ChiTietKhoaHocActivity.this, XemKhoaHocActivity.class));
+                    return true;
+                } else if (itemId == R.id.nav_profile) {
+                    startActivity(new Intent(ChiTietKhoaHocActivity.this, UserProfileActivity.class));
+                    // finish();
+                    return true;
+                }
+                return false;
+            }
+        });
+        // Chọn mục "Trang chủ" mặc định khi activity khởi động
+
     }
 }
