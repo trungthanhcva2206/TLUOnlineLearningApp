@@ -41,12 +41,11 @@ public class DanhSachGiangVienActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerGiangVien);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         danhSachGiangVien = new ArrayList<>();
-        int avatarMacDinh = R.drawable.ic_avatar;
 
-        danhSachGiangVien.add(new GiangVien("Nguyễn Văn Nam", "Hệ thống thông tin", avatarMacDinh));
-        danhSachGiangVien.add(new GiangVien("Trương Xuân Nam", "Mạng máy tính", avatarMacDinh));
-        danhSachGiangVien.add(new GiangVien("Nguyễn Thị Thu Hương", "Công nghệ phần mềm", avatarMacDinh));
-        // Thêm giảng viên khác
+        danhSachGiangVien.add(new GiangVien("Nguyễn Văn Nam", "Hệ thống thông tin", R.drawable.gv_ng_van_nam_portrait));
+        danhSachGiangVien.add(new GiangVien("Nguyễn Tu Trung", "Hệ thống thông tin", R.drawable.gv_ng_tu_trung_portrait));
+        danhSachGiangVien.add(new GiangVien("Nguyễn Thị Thu Hương", "Công nghệ phần mềm", R.drawable.gv_ng_thi_thu_huong));
+        danhSachGiangVien.add(new GiangVien("Trương Xuân Nam", "Mạng máy tính", R.drawable.gv_truong_xuan_nam));
 
         adapter = new GiangVienAdapter(danhSachGiangVien, giangVien -> {
             Intent intent = new Intent(this, ChiTietGiangVienActivity.class);

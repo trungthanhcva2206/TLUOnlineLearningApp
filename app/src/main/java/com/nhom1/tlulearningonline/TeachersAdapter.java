@@ -10,6 +10,8 @@ import android.widget.Toast; // Used for example click listener
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+
 import java.util.List;
 
 /**
@@ -62,7 +64,12 @@ public class TeachersAdapter extends RecyclerView.Adapter<TeachersAdapter.Teache
         holder.tvTeacherName.setText(teacher.getName());
 
         // Set the teacher's avatar image using the drawable resource ID
-        holder.ivTeacherAvatar.setImageResource(teacher.getAvatarResId());
+        Glide.with(holder.itemView.getContext())
+                .load(teacher.getAvatarResId())
+                .placeholder(R.drawable.ic_avatar)
+                .error(R.drawable.ic_avatar)
+                .circleCrop()
+                .into(holder.ivTeacherAvatar);
 
         // Set an onClickListener for the entire item view
         holder.itemView.setOnClickListener(v -> {

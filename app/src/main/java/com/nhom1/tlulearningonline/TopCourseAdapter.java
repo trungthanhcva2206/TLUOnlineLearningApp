@@ -1,5 +1,6 @@
 package com.nhom1.tlulearningonline;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -79,12 +81,24 @@ public class TopCourseAdapter extends RecyclerView.Adapter<TopCourseAdapter.Cour
 
         // Click listener for the entire item view (e.g., to open course details)
         holder.itemView.setOnClickListener(v -> {
-            Toast.makeText(v.getContext(), "Mở khóa học: " + course.getTitle(), Toast.LENGTH_SHORT).show();
-            // TODO: Implement navigation to ChiTietKhoaHocActivity or a similar course detail activity
-            // Example: Intent intent = new Intent(v.getContext(), ChiTietKhoaHocActivity.class);
-            //          intent.putExtra("course_title", course.getTitle());
-            //          // Pass other course details if needed
-            //          v.getContext().startActivity(intent);
+            // Remove the Toast message
+            // Toast.makeText(v.getContext(), "Mở khóa học: " + course.getTitle(), Toast.LENGTH_SHORT).show();
+
+            // Implement navigation to ChiTietKhoaHocActivity
+            Intent intent = new Intent(v.getContext(), ChiTietKhoaHocActivity.class);
+            intent.putExtra("tieu_de", course.getTitle());
+            intent.putExtra("mo_ta", "Đây là môn học về " + course.getDepartment().toLowerCase() + ", được giảng dạy bởi " + course.getInstructor());
+            intent.putExtra("tac_gia", course.getInstructor());
+            intent.putExtra("so_bai", course.getSoBaiHoc()); // Pass the number of lessons
+
+            // Generate dummy lesson list for ChiTietKhoaHocActivity
+            ArrayList<String> dsBaiHoc = new ArrayList<>();
+            for (int j = 1; j <= course.getSoBaiHoc(); j++) {
+                dsBaiHoc.add("Bài " + j + ": Bài học về " + course.getTitle());
+            }
+            intent.putStringArrayListExtra("ds_bai_hoc", dsBaiHoc);
+
+            v.getContext().startActivity(intent);
         });
 
         // Click listener for the star/save button

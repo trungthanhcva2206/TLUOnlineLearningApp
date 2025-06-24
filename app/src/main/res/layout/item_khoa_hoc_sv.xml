@@ -60,6 +60,7 @@
             android:text="Bộ môn: Hệ thống thông tin"
             android:textSize="16sp"
             android:textColor="#FFFFFF"
+            android:textStyle="bold"
             android:layout_marginTop="4dp"
             android:layout_marginBottom="16dp"
             app:layout_constraintTop_toBottomOf="@id/txt_giang_vien"

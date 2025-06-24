@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
+import com.bumptech.glide.Glide;
 import com.nhom1.tlulearningonline.R;
 import com.nhom1.tlulearningonline.GiangVien;
 
@@ -44,7 +45,14 @@ public class GiangVienAdapter extends RecyclerView.Adapter<GiangVienAdapter.Gian
         GiangVien giangVien = danhSachGiangVien.get(position);
         holder.tvTenGiangVien.setText(giangVien.getTen());
         holder.tvBoMon.setText("Bộ môn: "+giangVien.getBoMon());
-        holder.ivAvatar.setImageResource(giangVien.getAvatarResId());
+//        holder.ivAvatar.setImageResource(giangVien.getAvatarResId());
+
+        Glide.with(holder.ivAvatar.getContext())
+                .load(giangVien.getAvatarResId())
+                .placeholder(R.drawable.ic_avatar)
+                .error(R.drawable.ic_avatar)
+                .circleCrop()
+                .into(holder.ivAvatar);
 
         // Thiết lập màu nền so le theo vị trí chẵn lẻ - áp dụng cho CardView để giữ bo góc
         int backgroundColorResId = (position % 2 == 0) ? R.color.blue : R.color.blue_3;
