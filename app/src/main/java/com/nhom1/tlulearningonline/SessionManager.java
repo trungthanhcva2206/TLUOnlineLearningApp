@@ -7,7 +7,7 @@ public class SessionManager {
     private static final String PREF_NAME = "UserSession";
     private static final String KEY_USER_ID = "user_id";
     private static final String KEY_LOGIN_TIME = "login_time";
-    private static final long SESSION_TIMEOUT = 2 * 60 * 60 * 1000; // 2 giờ
+    private static final long SESSION_TIMEOUT = 1 * 60 * 1000; // 2 giờ
 
     private final SharedPreferences prefs;
     private final SharedPreferences.Editor editor;

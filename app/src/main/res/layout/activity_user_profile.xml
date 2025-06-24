@@ -67,8 +67,7 @@
                 android:layout_marginBottom="8dp"
                 android:background="@drawable/bg_avatar_circle"
                 android:scaleType="centerCrop"
-                android:src="@drawable/ic_avatar"
-                app:tint="@color/white"/>
+                android:src="@drawable/ic_avatar" />
 
             <TextView
                 android:id="@+id/tv_user_name"

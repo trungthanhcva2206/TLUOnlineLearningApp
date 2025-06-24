@@ -2,6 +2,8 @@ package com.nhom1.tlulearningonline;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -12,7 +14,15 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class UserProfileActivity extends AppCompatActivity {
 
@@ -20,6 +30,10 @@ public class UserProfileActivity extends AppCompatActivity {
     private TextView tvUserName, tvUserDepartment, tvUserEmail;
     private Button btnSettings, btnSupport, btnAboutUs, btnLogout;
     private BottomNavigationView bottomNavigationView;
+
+    private SessionManager sessionManager;
+    private Handler sessionHandler;
+    private Runnable sessionCheckRunnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +54,10 @@ public class UserProfileActivity extends AppCompatActivity {
 
         // Đổ dữ liệu cứng (hard-coded) vào giao diện
         loadDummyData();
+        sessionManager = new SessionManager(this);
+        setupSessionCheck();
+
+        fetchUserInfo();
 
         // Xử lý sự kiện click
         btnBack.setOnClickListener(v -> finish()); // Quay lại màn hình trước đó
@@ -51,6 +69,7 @@ public class UserProfileActivity extends AppCompatActivity {
 
         // Xử lý sự kiện cho nút Đăng xuất
         btnLogout.setOnClickListener(v -> {
+            sessionManager.clearSession();
             // Hiển thị Toast thông báo
             Toast.makeText(UserProfileActivity.this, "Đăng xuất thành công!", Toast.LENGTH_SHORT).show();
 
@@ -62,20 +81,87 @@ public class UserProfileActivity extends AppCompatActivity {
             finish(); // Đóng UserProfileActivity
         });
 
-        // Xử lý thanh điều hướng dưới cùng
         setupBottomNavigation();
     }
 
     private void loadDummyData() {
-        // Đây là nơi bạn sẽ đổ dữ liệu người dùng thật vào sau này.
-        // Hiện tại, chúng ta dùng dữ liệu cứng như trong ảnh mẫu.
-        tvUserName.setText("Nguyễn Thị Phương Anh");
-        tvUserDepartment.setText("Hệ thống thông tin");
-        tvUserEmail.setText("2251161942@e.tlu.edu.vn");
-        // Bạn có thể thay đổi ảnh đại diện nếu muốn
-        // ivUserAvatar.setImageResource(R.drawable.your_avatar_image);
+        tvUserDepartment.setText("Đại học Thuỷ Lợi");
     }
 
+    private void fetchUserInfo() {
+        String userId = sessionManager.getUserId();
+
+        if (userId == null || userId.isEmpty()) {
+            Toast.makeText(this, "Không tìm thấy userId!", Toast.LENGTH_SHORT).show();
+            sessionManager.clearSession();
+            Intent intent = new Intent(UserProfileActivity.this, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+            return;
+        }
+
+        String url = "http://14.225.207.221:6060/mobile/users/" + userId;
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+        StringRequest request = new StringRequest(Request.Method.GET, url,
+                response -> {
+                    try {
+                        JSONObject user = new JSONObject(response);
+                        String fullName = user.optString("fullname", "Người dùng");
+                        String email = user.optString("username", "Không có username");
+                        String avatarUrl = user.optString("avatar_url", "");
+
+                        tvUserName.setText(fullName);
+                        tvUserEmail.setText(email);
+
+                        if (!avatarUrl.isEmpty()) {
+                            Glide.with(this)
+                                    .load(avatarUrl)
+                                    .placeholder(R.drawable.ic_avatar)
+                                    .error(R.drawable.ic_avatar)
+                                    .circleCrop()
+                                    .into(ivUserAvatar);
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(this, "Lỗi xử lý JSON!", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                error -> {
+                    if (error.networkResponse != null && error.networkResponse.statusCode == 401) {
+                        sessionManager.clearSession();
+                        Toast.makeText(this, "Phiên đăng nhập đã hết hạn!", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(UserProfileActivity.this, LoginActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        error.printStackTrace();
+                        Toast.makeText(this, "Lỗi kết nối tới máy chủ!", Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+
+        queue.add(request);
+    }
+    private void setupSessionCheck() {
+        sessionHandler = new Handler(Looper.getMainLooper());
+        sessionCheckRunnable = () -> {
+            if (!sessionManager.isLoggedIn()) {
+                Toast.makeText(this, "Phiên đăng nhập đã hết hạn!", Toast.LENGTH_SHORT).show();
+                sessionManager.clearSession();
+                Intent intent = new Intent(UserProfileActivity.this, LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
+            } else {
+                sessionHandler.postDelayed(sessionCheckRunnable, 10000);
+            }
+        };
+        sessionHandler.postDelayed(sessionCheckRunnable, 10000);
+    }
     private void setupBottomNavigation() {
         // Đặt mục "Hồ sơ" là mục được chọn
         bottomNavigationView.setSelectedItemId(R.id.nav_profile);
@@ -100,5 +186,13 @@ public class UserProfileActivity extends AppCompatActivity {
             }
             return false;
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (sessionHandler != null && sessionCheckRunnable != null) {
+            sessionHandler.removeCallbacks(sessionCheckRunnable);
+        }
     }
 }
