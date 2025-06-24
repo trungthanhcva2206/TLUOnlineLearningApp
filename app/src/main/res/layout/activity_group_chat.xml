@@ -47,7 +47,6 @@
                 android:id="@+id/room_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="8 members, 5 online"
                 android:textSize="12sp"
                 android:textColor="#666666" />
         </LinearLayout>
