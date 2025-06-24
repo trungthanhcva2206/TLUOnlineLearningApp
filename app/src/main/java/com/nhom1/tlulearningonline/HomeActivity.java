@@ -182,16 +182,22 @@ public class HomeActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 int itemId = item.getItemId();
                 if (itemId == R.id.nav_home) {
+                    // Already on Home, do nothing
                     return true;
                 } else if (itemId == R.id.nav_forum) {
-                    startActivity(new Intent(HomeActivity.this, GroupChatActivity.class));
+                    Intent intent = new Intent(HomeActivity.this, GroupChatActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT); // Reorder existing activity
+                    startActivity(intent);
                     return true;
                 } else if (itemId == R.id.nav_courses) {
-                    startActivity(new Intent(HomeActivity.this, XemKhoaHocActivity.class));
+                    Intent intent = SessionManager.getCoursesActivityIntent(HomeActivity.this); // Use helper
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
                     return true;
                 } else if (itemId == R.id.nav_profile) {
-                    startActivity(new Intent(HomeActivity.this, UserProfileActivity.class));
-                    // finish();
+                    Intent intent = new Intent(HomeActivity.this, UserProfileActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
                     return true;
                 }
                 return false;

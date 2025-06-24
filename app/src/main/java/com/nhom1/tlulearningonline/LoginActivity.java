@@ -105,8 +105,9 @@ public class LoginActivity extends AppCompatActivity {
                             }
                             if (authenticated) {
                                 String userId = result.optString("id", "");
+                                String userRole = result.optString("role", "");
                                 SessionManager sessionManager = new SessionManager(this);
-                                sessionManager.saveLogin(userId);
+                                sessionManager.saveLogin(userId, userRole);
                                 Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
                                 Intent intent;
 

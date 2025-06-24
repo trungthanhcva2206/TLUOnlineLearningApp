@@ -1,6 +1,5 @@
 package com.nhom1.tlulearningonline;
 
-
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -33,12 +32,15 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
     private final ArrayList<KhoaHoc> danhSach = new ArrayList<>();
     private int viTriDangSua = -1;
 
-    private BottomNavigationView bottomNavigationView;
+    private BottomNavigationView bottomNavigationView; // Declared here
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quan_ly_khoa_hoc);
+
+        // Initialize bottomNavigationView here
+        bottomNavigationView = findViewById(R.id.bottom_navigation); // Add this line
 
         layoutDsKhoaHoc = findViewById(R.id.layout_ds_khoa_hoc);
         Button btnTaoKhoaHoc = findViewById(R.id.btn_tao_khoa_hoc);
@@ -67,7 +69,7 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 int itemId = item.getItemId();
                 if (itemId == R.id.nav_home) {
-                    startActivity(new Intent(QuanLyKhoaHocActivity.this, HomeActivity.class));
+                    startActivity(new Intent(QuanLyKhoaHocActivity.this, HomeGVActivity.class));
                     return true;
                 } else if (itemId == R.id.nav_forum) {
                     startActivity(new Intent(QuanLyKhoaHocActivity.this, GroupChatActivity.class));

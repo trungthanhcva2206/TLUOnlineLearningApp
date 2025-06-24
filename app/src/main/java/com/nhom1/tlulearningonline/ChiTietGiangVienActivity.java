@@ -75,29 +75,38 @@ public class ChiTietGiangVienActivity extends AppCompatActivity {
         });
 
 
-        // --- XỬ LÝ THANH ĐIỀU HƯỚNG DƯỚI CÙNG ---
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 int itemId = item.getItemId();
                 if (itemId == R.id.nav_home) {
-                    startActivity(new Intent(ChiTietGiangVienActivity.this, HomeActivity.class));
+                    Intent intent = new Intent(ChiTietGiangVienActivity.this, HomeActivity.class); // Assuming student home is default
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                    // finish(); // Remove finish() here unless you explicitly want to remove the current activity from stack
                     return true;
                 } else if (itemId == R.id.nav_forum) {
-                    startActivity(new Intent(ChiTietGiangVienActivity.this, GroupChatActivity.class));
+                    Intent intent = new Intent(ChiTietGiangVienActivity.this, GroupChatActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                    // finish();
                     return true;
                 } else if (itemId == R.id.nav_courses) {
-                    startActivity(new Intent(ChiTietGiangVienActivity.this, XemKhoaHocActivity.class));
+                    Intent intent = SessionManager.getCoursesActivityIntent(ChiTietGiangVienActivity.this); // Use helper
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                    // finish();
                     return true;
                 } else if (itemId == R.id.nav_profile) {
-                    startActivity(new Intent(ChiTietGiangVienActivity.this, UserProfileActivity.class));
+                    Intent intent = new Intent(ChiTietGiangVienActivity.this, UserProfileActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
                     // finish();
                     return true;
                 }
                 return false;
             }
         });
-        // Chọn mục "Trang chủ" mặc định khi activity khởi động
 
     }
 }

@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.strictmode.GetRetainInstanceUsageViolation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -77,28 +78,39 @@ public class GroupChatActivity extends AppCompatActivity {
             finish();
         });
 
-        // --- XỬ LÝ THANH ĐIỀU HƯỚNG DƯỚI CÙNG ---
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 int itemId = item.getItemId();
                 if (itemId == R.id.nav_home) {
-                    startActivity(new Intent(GroupChatActivity.this, HomeActivity.class));
+                    Intent intent = new Intent(GroupChatActivity.this, HomeActivity.class); // Assuming student home is default
+                    // If you need to dynamically go to HomeGVActivity, you'd need role check here too
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                    // finish(); // Remove finish() here unless you explicitly want to remove the current activity from stack
                     return true;
                 } else if (itemId == R.id.nav_forum) {
+                    Intent intent = new Intent(GroupChatActivity.this, GroupChatActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                    // finish();
                     return true;
                 } else if (itemId == R.id.nav_courses) {
-                    startActivity(new Intent(GroupChatActivity.this, XemKhoaHocActivity.class));
+                    Intent intent = SessionManager.getCoursesActivityIntent(GroupChatActivity.this); // Use helper
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                    // finish();
                     return true;
                 } else if (itemId == R.id.nav_profile) {
-                    startActivity(new Intent(GroupChatActivity.this, UserProfileActivity.class));
+                    Intent intent = new Intent(GroupChatActivity.this, UserProfileActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
                     // finish();
                     return true;
                 }
                 return false;
             }
         });
-        // Chọn mục "Trang chủ" mặc định khi activity khởi động
         bottomNavigationView.setSelectedItemId(R.id.nav_forum);
     }
 

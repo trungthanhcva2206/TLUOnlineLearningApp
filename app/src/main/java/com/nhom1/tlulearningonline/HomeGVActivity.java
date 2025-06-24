@@ -113,27 +113,33 @@ public class HomeGVActivity extends AppCompatActivity {
             @Override public void afterTextChanged(Editable s) {}
         });
 
-        // Xử lý Bottom Navigation
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 int itemId = item.getItemId();
                 if (itemId == R.id.nav_home) {
+                    // Already on HomeGV, do nothing
                     return true;
                 } else if (itemId == R.id.nav_forum) {
-                    startActivity(new Intent(HomeGVActivity.this, GroupChatActivity.class));
+                    Intent intent = new Intent(HomeGVActivity.this, GroupChatActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
                     return true;
                 } else if (itemId == R.id.nav_courses) {
-                    startActivity(new Intent(HomeGVActivity.this, QuanLyKhoaHocActivity.class)); // Giảng viên sẽ quản lý khóa học
+                    Intent intent = SessionManager.getCoursesActivityIntent(HomeGVActivity.this); // Use helper
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
                     return true;
                 } else if (itemId == R.id.nav_profile) {
-                    startActivity(new Intent(HomeGVActivity.this, UserProfileActivity.class));
+                    Intent intent = new Intent(HomeGVActivity.this, UserProfileActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
                     return true;
                 }
                 return false;
             }
         });
-        bottomNavigationView.setSelectedItemId(R.id.nav_home); // Giảng viên thường về trang chủ này
+        bottomNavigationView.setSelectedItemId(R.id.nav_home);
     }
 
     private void updateStatistics() {
