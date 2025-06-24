@@ -211,7 +211,8 @@ public class HomeActivity extends AppCompatActivity { // Đã đổi tên lớp 
                     startActivity(new Intent(HomeActivity.this, XemKhoaHocActivity.class));
                     return true;
                 } else if (itemId == R.id.nav_profile) {
-                    Toast.makeText(HomeActivity.this, "Chức năng Hồ sơ", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(HomeActivity.this, UserProfileActivity.class));
+                    // finish();
                     return true;
                 }
                 return false;
