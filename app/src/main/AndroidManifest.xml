@@ -55,6 +55,9 @@
         <activity android:name=".HomeActivity"
             android:exported="true"/>
         <activity
+            android:name=".HomeGVActivity"
+            android:exported="false" />
+        <activity
             android:name=".WelcomeActivity"
             android:exported="true">
             <intent-filter>

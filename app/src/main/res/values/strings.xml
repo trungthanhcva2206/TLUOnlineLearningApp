@@ -1,3 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">TLULearningOnline</string>
+    <!-- Các chuỗi đã thêm/cập nhật -->
+    <string name="greeting">Xin chào,</string>
+    <string name="search_hint">Tìm kiếm khóa học</string>
+    <string name="course_management_title">Quản lý khóa học</string>
+    <string name="featured_courses_title">Khoá học nổi bật</string>
+    <string name="lecturers_title">Giảng viên</string>
+    <string name="see_more_lecturers_description">Xem thêm giảng viên</string>
+    <string name="bottom_nav_home">Trang chủ</string>
+    <string name="bottom_nav_forum">Diễn đàn</string>
+    <string name="bottom_nav_courses">Khóa học</string>
+    <string name="bottom_nav_profile">Hồ sơ</string>
+    <string name="software_engineering">Công nghệ phần mềm</string>
+    <string name="information_systems">Hệ thống thông tin</string>
+    <string name="network_security">Mạng và An toàn thông tin</string>
+    <string name="course_count_format">%d bài học</string>
+    <string name="course_progress_format">%d%%</string>
+    <string name="no_courses_found">Không tìm thấy khóa học nào</string>
+    <string name="total_active_courses">Số khóa học đang hoạt động của tôi</string>
+    <string name="total_students_following">Tổng số sinh viên đang theo dõi</string>
+    <string name="total_lectures_posted">Số bài giảng đã đăng</string>
+    <string name="total_documents_uploaded">Tổng số tài liệu đã tải</string>
+    <string name="courses_label">Khóa học</string>
+    <string name="students_label">Sinh viên</string>
+    <string name="lectures_label">Bài giảng</string>
+    <string name="documents_label">Tài liệu</string>
+
 </resources>

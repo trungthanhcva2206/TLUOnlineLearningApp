@@ -10,10 +10,13 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
+// import android.view.LayoutInflater; // Không cần nếu Adapter nằm ngoài
+// import android.view.ViewGroup;     // Không cần nếu Adapter nằm ngoài
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+// import android.widget.Button; // Không cần nếu chỉ dùng trong Adapter
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -39,15 +42,13 @@ public class HomeActivity extends AppCompatActivity {
     private EditText edtSearch;
     private ImageView ivNotification, ivAvatar;
     private ImageView ivSeeMoreCourses, ivSeeMoreLecturers;
-
     private RecyclerView recyclerFeaturedCourses, recyclerInProgressCourses, recyclerTeachers;
-
     private FeaturedCoursesAdapter featuredCoursesAdapter;
     private FeaturedCoursesAdapter inProgressCoursesAdapter;
     private TeachersAdapter teachersAdapter;
-    private List<CourseItem> featuredCoursesList;
-    private List<CourseItem> inProgressCoursesList;
-    private List<TeacherItem> teacherList;
+    private List<CourseItem> featuredCoursesList = new ArrayList<>();
+    private List<CourseItem> inProgressCoursesList = new ArrayList<>();
+    private List<TeacherItem> teacherList = new ArrayList<>();
 
     private BottomNavigationView bottomNavigationView;
 
@@ -171,7 +172,7 @@ public class HomeActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {}
         });
 
-        ivSeeMoreLecturers.setOnClickListener(v -> { // "Xem thêm giảng viên"
+        ivSeeMoreLecturers.setOnClickListener(v -> {
             Intent intent = new Intent(HomeActivity.this, DanhSachGiangVienActivity.class);
             startActivity(intent);
         });
@@ -218,25 +219,28 @@ public class HomeActivity extends AppCompatActivity {
         };
         sessionHandler.postDelayed(sessionCheckRunnable, 10000); // bắt đầu sau 10 giây
     }
-    private void setupDummyData() {
-        // Dữ liệu mẫu cho Khóa học nổi bật
-        featuredCoursesList = new ArrayList<>();
-        featuredCoursesList.add(new CourseItem("Phát triển ứng dụng trên thiết bị di động", "Nguyễn Văn Nam", "Hệ thống thông tin", 80, false));
-        featuredCoursesList.add(new CourseItem("Phân tích thiết kế hệ thống thông tin", "Trần Hùng Anh", "Hệ thống thông tin", 60, true));
-        featuredCoursesList.add(new CourseItem("Cơ sở dữ liệu nâng cao", "Phạm Nhật Anh", "Công nghệ phần mềm", 95, false));
-        featuredCoursesList.add(new CourseItem("Lập trình Web Frontend", "Lê Văn B", "Khoa học máy tính", 40, true));
-        featuredCoursesList.add(new CourseItem("Trí tuệ nhân tạo cơ bản", "Đinh Thị C", "Công nghệ thông tin", 70, false));
 
-        // Dữ liệu mẫu cho Khóa học đang học (chỉ một khóa học duy nhất)
-        inProgressCoursesList = new ArrayList<>();
-        inProgressCoursesList.add(new CourseItem("Tương tác người máy", "Nguyễn Thị Thu Hương", "Khoa CNTT", 10, true)); // Chỉ một khóa học duy nhất
+    private void setupDummyData() {
+        // Clear existing data before adding new dummy data, important if setupDummyData is called multiple times
+        featuredCoursesList.clear();
+        inProgressCoursesList.clear();
+        teacherList.clear();
+
+        // Dữ liệu mẫu cho Khóa học nổi bật - Đã cập nhật để bao gồm soBaiHoc
+        featuredCoursesList.add(new CourseItem("Phát triển ứng dụng trên thiết bị di động", "Nguyễn Văn Nam", "Hệ thống thông tin", 80, false, 15));
+        featuredCoursesList.add(new CourseItem("Phân tích thiết kế hệ thống thông tin", "Trần Hùng Anh", "Hệ thống thông tin", 60, true, 12));
+        featuredCoursesList.add(new CourseItem("Cơ sở dữ liệu nâng cao", "Phạm Nhật Anh", "Công nghệ phần mềm", 95, false, 20));
+        featuredCoursesList.add(new CourseItem("Lập trình Web Frontend", "Lê Văn B", "Khoa học máy tính", 40, true, 18));
+        featuredCoursesList.add(new CourseItem("Trí tuệ nhân tạo cơ bản", "Đinh Thị C", "Công nghệ thông tin", 70, false, 10));
+
+        // Dữ liệu mẫu cho Khóa học đang học (chỉ một khóa học duy nhất) - Đã cập nhật để bao gồm soBaiHoc
+        inProgressCoursesList.add(new CourseItem("Tương tác người máy", "Nguyễn Thị Thu Hương", "Khoa CNTT", 10, true, 8));
+
 
         // Dữ liệu mẫu cho Giảng viên
-        teacherList = new ArrayList<>();
-        teacherList.add(new TeacherItem("Nguyễn Văn Nam", R.drawable.ic_avatar));
-        teacherList.add(new TeacherItem("Nguyễn Tu Trung", R.drawable.ic_avatar));
-        teacherList.add(new TeacherItem("Nguyễn Thị Thu Hương", R.drawable.ic_avatar));
-        teacherList.add(new TeacherItem("Trương Xuân Nam", R.drawable.ic_avatar));
-        teacherList.add(new TeacherItem("Trần Hồng Diệp", R.drawable.ic_avatar));
+        teacherList.add(new TeacherItem("Nguyễn Văn Nam", R.drawable.gv_ng_van_nam_portrait));
+        teacherList.add(new TeacherItem("Nguyễn Tu Trung", R.drawable.gv_ng_tu_trung_portrait));
+        teacherList.add(new TeacherItem("Nguyễn Thị Thu Hương", R.drawable.gv_ng_thi_thu_huong));
+        teacherList.add(new TeacherItem("Trương Xuân Nam", R.drawable.gv_truong_xuan_nam));
     }
 }

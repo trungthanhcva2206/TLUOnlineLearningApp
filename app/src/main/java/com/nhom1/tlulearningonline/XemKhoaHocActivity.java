@@ -38,28 +38,24 @@ public class XemKhoaHocActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_xem_khoa_hoc);
-        // Trong HomeActivity.java và UserProfileActivity.java
+
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
-        // Khởi tạo view sau khi setContentView
         layoutThamGia = findViewById(R.id.layout_khoa_hoc_tham_gia);
         layoutDaLuu = findViewById(R.id.layout_khoa_hoc_da_luu);
         edtTimKiem = findViewById(R.id.edt_tim_kiem);
         tvKhongTimThay = findViewById(R.id.tv_khong_tim_thay);
         ivAvatar = findViewById(R.id.iv_avatar);
 
-        // Dữ liệu mẫu
-        khoaHocThamGia.add(new KhoaHoc("Tương tác người máy", "GV: Nguyễn Thị Thu Hương", "Bộ môn Công nghệ phần mềm", 80));
-        khoaHocThamGia.add(new KhoaHoc("Công nghệ Web", "GV: Nguyễn Tu Trung", "Bộ môn Hệ thống thông tin", 25));
-        khoaHocThamGia.add(new KhoaHoc("Lập trình Java", "GV: Trần Văn B", "Bộ môn Công nghệ phần mềm", 60));
-        khoaHocThamGia.add(new KhoaHoc("Cơ sở dữ liệu", "GV: Trần Hồng Diệp", "Bộ môn Hệ thống thông tin", 45));
+        khoaHocThamGia.add(new KhoaHoc("Tương tác người máy", "GV: Nguyễn Thị Thu Hương", "Bộ môn Công nghệ phần mềm", 80, 15));
+        khoaHocThamGia.add(new KhoaHoc("Công nghệ Web", "GV: Nguyễn Tu Trung", "Bộ môn Hệ thống thông tin", 25, 10));
+        khoaHocThamGia.add(new KhoaHoc("Lập trình Java", "GV: Trần Văn B", "Bộ môn Công nghệ phần mềm", 60, 20));
+        khoaHocThamGia.add(new KhoaHoc("Cơ sở dữ liệu", "GV: Trần Hồng Diệp", "Bộ môn Hệ thống thông tin", 45, 12));
 
-        khoaHocDaLuu.add(new KhoaHoc("Khai phá dữ liệu", "GV: Lê Thị Tú Kiên", "Bộ môn Hệ thống thông tin", 80));
+        khoaHocDaLuu.add(new KhoaHoc("Khai phá dữ liệu", "GV: Lê Thị Tú Kiên", "Bộ môn Hệ thống thông tin", 80, 8));
 
-        // Hiển thị danh sách ban đầu
         hienThiKhoaHoc();
 
-        // Xử lý tìm kiếm
         edtTimKiem.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void afterTextChanged(Editable s) {}
@@ -96,7 +92,6 @@ public class XemKhoaHocActivity extends AppCompatActivity {
                 return false;
             }
         });
-        // Chọn mục "Trang chủ" mặc định khi activity khởi động
         bottomNavigationView.setSelectedItemId(R.id.nav_courses);
     }
 
@@ -133,17 +128,15 @@ public class XemKhoaHocActivity extends AppCompatActivity {
     }
 
     private View createCard(KhoaHoc kh, boolean daLuu, int position) {
-        View view = LayoutInflater.from(this).inflate(R.layout.item_khoa_hoc_sv_blue, null);
+        View view = LayoutInflater.from(this).inflate(R.layout.item_khoa_hoc_sv, null);
 
         // Đổi màu nền
         CardView cardView = (CardView) view;
         int colorId = (position % 2 == 0) ? R.color.blue_3 : R.color.blue;
         cardView.setCardBackgroundColor(ContextCompat.getColor(this, colorId));
 
-        // Gán dữ liệu
         CustomViewBinderSV.bind(view, kh);
 
-        // Nút lưu
         ImageView btnSave = view.findViewById(R.id.btn_save);
         btnSave.setImageResource(daLuu ? R.drawable.ic_star_filled : R.drawable.ic_star_border);
 
@@ -157,16 +150,15 @@ public class XemKhoaHocActivity extends AppCompatActivity {
             }
         });
 
-        // Mở chi tiết
         view.setOnClickListener(v -> {
             Intent intent = new Intent(XemKhoaHocActivity.this, ChiTietKhoaHocActivity.class);
             intent.putExtra("tieu_de", kh.ten);
             intent.putExtra("mo_ta", "Đây là môn học về " + kh.boMon.toLowerCase() + ", được giảng dạy bởi " + kh.giangVien);
             intent.putExtra("tac_gia", kh.giangVien);
-            intent.putExtra("so_bai", 10);
+            intent.putExtra("so_bai", kh.soBaiHoc);
 
             ArrayList<String> dsBaiHoc = new ArrayList<>();
-            for (int j = 1; j <= 10; j++) {
+            for (int j = 1; j <= kh.soBaiHoc; j++) {
                 dsBaiHoc.add("Bài " + j + ": Bài học về " + kh.ten);
             }
             intent.putStringArrayListExtra("ds_bai_hoc", dsBaiHoc);
@@ -174,7 +166,6 @@ public class XemKhoaHocActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        // ➕ Thêm khoảng cách dưới cho mỗi thẻ
         LinearLayout wrapper = new LinearLayout(this);
         wrapper.setOrientation(LinearLayout.VERTICAL);
 
@@ -192,12 +183,18 @@ public class XemKhoaHocActivity extends AppCompatActivity {
     public static class KhoaHoc {
         String ten, giangVien, boMon;
         int tienDo;
+        int soBaiHoc;
 
-        public KhoaHoc(String ten, String giangVien, String boMon, int tienDo) {
+        public KhoaHoc(String ten, String giangVien, String boMon, int tienDo, int soBaiHoc) {
             this.ten = ten;
             this.giangVien = giangVien;
             this.boMon = boMon;
             this.tienDo = tienDo;
+            this.soBaiHoc = soBaiHoc;
+        }
+
+        public KhoaHoc(String ten, String giangVien, String boMon, int tienDo) {
+            this(ten, giangVien, boMon, tienDo, 0); // Mặc định số bài học là 0
         }
     }
 }

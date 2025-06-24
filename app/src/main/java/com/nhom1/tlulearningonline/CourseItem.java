@@ -11,6 +11,7 @@ public class CourseItem {
     private String department;
     private int progress; // Course completion progress (e.g., 0-100)
     private boolean isStarred; // Indicates if the course is starred/saved (for the star icon)
+    private int soBaiHoc; // Đã THÊM: Số lượng bài học trong khóa học
 
     /**
      * Constructs a new CourseItem.
@@ -18,16 +19,32 @@ public class CourseItem {
      * @param title      The title of the course.
      * @param instructor The name of the instructor for the course.
      * @param department The department or field of the course.
-     * @param progress   The progress percentage of the course (e.g., 80 for 80%).
+     * @param progress   The progress percentage of the course (e.g., 0-100).
      * @param isStarred  True if the course is starred/highlighted, false otherwise.
+     * @param soBaiHoc   The number of lessons in the course. (Đã THÊM tham số này)
      */
-    public CourseItem(String title, String instructor, String department, int progress, boolean isStarred) {
+    public CourseItem(String title, String instructor, String department, int progress, boolean isStarred, int soBaiHoc) {
         this.title = title;
         this.instructor = instructor;
         this.department = department;
         this.progress = progress;
         this.isStarred = isStarred;
+        this.soBaiHoc = soBaiHoc; // Khởi tạo trường mới
     }
+
+    /**
+     * Overloaded constructor for compatibility with older calls (assigns default soBaiHoc).
+     *
+     * @param title      The title of the course.
+     * @param instructor The name of the instructor for the course.
+     * @param department The department or field of the course.
+     * @param progress   The progress percentage of the course (e.g., 0-100).
+     * @param isStarred  True if the course is starred/highlighted, false otherwise.
+     */
+    public CourseItem(String title, String instructor, String department, int progress, boolean isStarred) {
+        this(title, instructor, department, progress, isStarred, 0); // Mặc định soBaiHoc là 0 cho constructor cũ
+    }
+
 
     /**
      * Returns the title of the course.
@@ -75,5 +92,13 @@ public class CourseItem {
      */
     public void setStarred(boolean starred) {
         isStarred = starred;
+    }
+
+    /**
+     * Returns the number of lessons in the course. (Đã THÊM getter này)
+     * @return The number of lessons.
+     */
+    public int getSoBaiHoc() {
+        return soBaiHoc;
     }
 }
