@@ -66,8 +66,7 @@
                     android:layout_height="32dp"
                     android:src="@drawable/ic_avatar"
                     android:background="@drawable/bg_avatar_circle"
-                    android:scaleType="centerCrop"
-                    app:tint="@color/white"/>
+                    android:scaleType="centerCrop"/>
             </LinearLayout>
 
             <EditText
