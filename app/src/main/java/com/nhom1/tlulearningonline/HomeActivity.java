@@ -1,4 +1,6 @@
-package com.nhom1.tlulearningonline; // Đảm bảo thay đổi package này nếu tên package của bạn khác
+package com.nhom1.tlulearningonline;
+
+import static androidx.core.content.ContextCompat.startActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -31,23 +33,21 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HomeActivity extends AppCompatActivity { // Đã đổi tên lớp từ MainActivity sang HomeActivity
+public class HomeActivity extends AppCompatActivity {
 
     private TextView tvGreeting, tvUserName;
     private EditText edtSearch;
     private ImageView ivNotification, ivAvatar;
-    // Đã cập nhật lại các ID Image View để khớp với XML bạn đã cung cấp
-    private ImageView ivSeeMoreCourses, ivSeeMoreLecturers; // Giữ nguyên tên biến khớp với ID trong XML
+    private ImageView ivSeeMoreCourses, ivSeeMoreLecturers;
 
-    // Đã thêm RecyclerView cho "Khoá học đang học"
-    private RecyclerView recyclerFeaturedCourses, recyclerInProgressCourses, recyclerTeachers; // Đổi tên recycler_lecturers thành recyclerTeachers
+    private RecyclerView recyclerFeaturedCourses, recyclerInProgressCourses, recyclerTeachers;
 
     private FeaturedCoursesAdapter featuredCoursesAdapter;
-    private FeaturedCoursesAdapter inProgressCoursesAdapter; // Adapter cho khóa học đang học
-    private TeachersAdapter teachersAdapter; // Đã thống nhất tên là TeachersAdapter
+    private FeaturedCoursesAdapter inProgressCoursesAdapter;
+    private TeachersAdapter teachersAdapter;
     private List<CourseItem> featuredCoursesList;
-    private List<CourseItem> inProgressCoursesList; // Danh sách cho khóa học đang học
-    private List<TeacherItem> teacherList; // Đã thống nhất tên là TeacherItem
+    private List<CourseItem> inProgressCoursesList;
+    private List<TeacherItem> teacherList;
 
     private BottomNavigationView bottomNavigationView;
 
@@ -117,55 +117,41 @@ public class HomeActivity extends AppCompatActivity { // Đã đổi tên lớp 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home_dashboard);
+        setContentView(R.layout.activity_home_sv);
 
-        // Khởi tạo các View từ layout
         tvGreeting = findViewById(R.id.tv_greeting);
         tvUserName = findViewById(R.id.tv_user_name);
         ivNotification = findViewById(R.id.iv_notification);
         ivAvatar = findViewById(R.id.iv_avatar);
         edtSearch = findViewById(R.id.edt_search);
 
-        // Khởi tạo RecyclerViews
         recyclerFeaturedCourses = findViewById(R.id.recycler_featured_courses);
-        recyclerInProgressCourses = findViewById(R.id.inprogress_course); // ID đúng của RecyclerView "Khoá học đang học"
-        recyclerTeachers = findViewById(R.id.recycler_lecturers); // ID của RecyclerView giảng viên trong XML
+        recyclerInProgressCourses = findViewById(R.id.inprogress_course);
+        recyclerTeachers = findViewById(R.id.recycler_lecturers);
 
-        // Khởi tạo các ImageView "Xem thêm" (từ XML)
-        ivSeeMoreCourses = findViewById(R.id.iv_see_more_courses); // ID của ImageView "xem thêm khóa học nổi bật"
-        ivSeeMoreLecturers = findViewById(R.id.iv_see_more_lecturers); // ID của ImageView "xem thêm giảng viên"
-        // iv_see_more_inprogress_courses KHÔNG CÓ TRONG XML BẠN CUNG CẤP, NÊN ĐÃ BỎ KHỎI ĐÂY
-
+        ivSeeMoreLecturers = findViewById(R.id.iv_see_more_lecturers);
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
-
-        // --- CHUẨN BỊ DỮ LIỆU MẪU ---
         setupDummyData();
         fetchUserInfo();
         setupSessionCheck();
 
-        // --- CÀI ĐẶT RECYCLERVIEW KHÓA HỌC NỔI BẬT ---
         featuredCoursesAdapter = new FeaturedCoursesAdapter(featuredCoursesList);
         LinearLayoutManager featuredCoursesLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         recyclerFeaturedCourses.setLayoutManager(featuredCoursesLayoutManager);
         recyclerFeaturedCourses.setAdapter(featuredCoursesAdapter);
 
-        // --- CÀI ĐẶT RECYCLERVIEW KHÓA HỌC ĐANG HỌC ---
-        // inProgressCoursesList giờ chỉ chứa một CourseItem duy nhất như bạn yêu cầu
         inProgressCoursesAdapter = new FeaturedCoursesAdapter(inProgressCoursesList);
         LinearLayoutManager inProgressCoursesLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         recyclerInProgressCourses.setLayoutManager(inProgressCoursesLayoutManager);
         recyclerInProgressCourses.setAdapter(inProgressCoursesAdapter);
 
-
-        // --- CÀI ĐẶT RECYCLERVIEW GIẢNG VIÊN ---
-        teachersAdapter = new TeachersAdapter(teacherList); // Đã đổi tên Adapter
+        teachersAdapter = new TeachersAdapter(teacherList);
         LinearLayoutManager teachersLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         recyclerTeachers.setLayoutManager(teachersLayoutManager);
         recyclerTeachers.setAdapter(teachersAdapter);
 
-        // --- XỬ LÝ TƯƠNG TÁC Ở HEADER ---
         ivNotification.setOnClickListener(v -> Toast.makeText(HomeActivity.this, "Thông báo!", Toast.LENGTH_SHORT).show());
         ivAvatar.setOnClickListener(v -> Toast.makeText(HomeActivity.this, "Mở Hồ sơ cá nhân!", Toast.LENGTH_SHORT).show());
 
@@ -182,22 +168,10 @@ public class HomeActivity extends AppCompatActivity { // Đã đổi tên lớp 
             public void afterTextChanged(Editable s) {}
         });
 
-        // --- XỬ LÝ NÚT "XEM THÊM" ---
-        ivSeeMoreCourses.setOnClickListener(v -> { // "Xem thêm khóa học nổi bật"
-            Toast.makeText(HomeActivity.this, "Xem thêm khoá học nổi bật", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(HomeActivity.this, XemKhoaHocActivity.class);
-            startActivity(intent);
-        });
-
-        // VÌ iv_see_more_inprogress_courses KHÔNG CÓ TRONG XML CỦA BẠN, TÔI ĐÃ LOẠI BỎ CLICK LISTENER NÀY
-        // Nếu bạn muốn có nút xem thêm cho khóa học đang học, bạn cần thêm ImageView với ID đó vào XML.
-
         ivSeeMoreLecturers.setOnClickListener(v -> { // "Xem thêm giảng viên"
             Toast.makeText(HomeActivity.this, "Xem thêm giảng viên", Toast.LENGTH_SHORT).show();
         });
 
-
-        // --- XỬ LÝ THANH ĐIỀU HƯỚNG DƯỚI CÙNG ---
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -218,7 +192,6 @@ public class HomeActivity extends AppCompatActivity { // Đã đổi tên lớp 
                 return false;
             }
         });
-        // Chọn mục "Trang chủ" mặc định khi activity khởi động
         bottomNavigationView.setSelectedItemId(R.id.nav_home);
     }
 
@@ -253,7 +226,6 @@ public class HomeActivity extends AppCompatActivity { // Đã đổi tên lớp 
         // Dữ liệu mẫu cho Khóa học đang học (chỉ một khóa học duy nhất)
         inProgressCoursesList = new ArrayList<>();
         inProgressCoursesList.add(new CourseItem("Tương tác người máy", "Nguyễn Thị Thu Hương", "Khoa CNTT", 10, true)); // Chỉ một khóa học duy nhất
-
 
         // Dữ liệu mẫu cho Giảng viên
         teacherList = new ArrayList<>();

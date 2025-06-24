@@ -44,7 +44,7 @@ public class FeaturedCoursesAdapter extends RecyclerView.Adapter<FeaturedCourses
     @Override
     public CourseViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         // Inflate the item_khoa_hoc_sv.xml layout for each course item
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_khoa_hoc_sv_blue, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_khoa_hoc_sv_progress, parent, false);
         return new CourseViewHolder(view);
     }
 

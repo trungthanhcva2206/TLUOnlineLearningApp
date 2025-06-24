@@ -31,20 +31,20 @@ public class XemKhoaHocActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_xem_khoa_hoc);
-
+//
         // Khởi tạo view sau khi setContentView
         layoutThamGia = findViewById(R.id.layout_khoa_hoc_tham_gia);
         layoutDaLuu = findViewById(R.id.layout_khoa_hoc_da_luu);
         edtTimKiem = findViewById(R.id.edt_tim_kiem);
         tvKhongTimThay = findViewById(R.id.tv_khong_tim_thay);
-
-        // Dữ liệu mẫu
-        khoaHocThamGia.add(new KhoaHoc("Tương tác người máy", "GV: Nguyễn Thị Thu Hương", "Bộ môn Công nghệ phần mềm", 80));
-        khoaHocThamGia.add(new KhoaHoc("Công nghệ Web", "GV: Nguyễn Tu Trung", "Bộ môn Hệ thống thông tin", 25));
-        khoaHocThamGia.add(new KhoaHoc("Lập trình Java", "GV: Trần Văn B", "Bộ môn Công nghệ phần mềm", 60));
-        khoaHocThamGia.add(new KhoaHoc("Cơ sở dữ liệu", "GV: Trần Hồng Diệp", "Bộ môn Hệ thống thông tin", 45));
-
-        khoaHocDaLuu.add(new KhoaHoc("Khai phá dữ liệu", "GV: Lê Thị Tú Kiên", "Bộ môn Hệ thống thông tin", 80));
+//
+//        // Dữ liệu mẫu
+//        khoaHocThamGia.add(new KhoaHoc("Tương tác người máy", "GV: Nguyễn Thị Thu Hương", "Bộ môn Công nghệ phần mềm", 80));
+//        khoaHocThamGia.add(new KhoaHoc("Công nghệ Web", "GV: Nguyễn Tu Trung", "Bộ môn Hệ thống thông tin", 25));
+//        khoaHocThamGia.add(new KhoaHoc("Lập trình Java", "GV: Trần Văn B", "Bộ môn Công nghệ phần mềm", 60));
+//        khoaHocThamGia.add(new KhoaHoc("Cơ sở dữ liệu", "GV: Trần Hồng Diệp", "Bộ môn Hệ thống thông tin", 45));
+//
+//        khoaHocDaLuu.add(new KhoaHoc("Khai phá dữ liệu", "GV: Lê Thị Tú Kiên", "Bộ môn Hệ thống thông tin", 80));
 
         // Hiển thị danh sách ban đầu
         hienThiKhoaHoc();
@@ -94,11 +94,11 @@ public class XemKhoaHocActivity extends AppCompatActivity {
     }
 
     private View createCard(KhoaHoc kh, boolean daLuu, int position) {
-        View view = LayoutInflater.from(this).inflate(R.layout.item_khoa_hoc_sv_blue, null);
+        View view = LayoutInflater.from(this).inflate(R.layout.item_khoa_hoc_sv_progress, null);
 
         // Đổi màu nền
         CardView cardView = (CardView) view;
-        int colorId = (position % 2 == 0) ? R.color.blue_3 : R.color.blue;
+        int colorId = (position % 2 == 0) ? R.color.blue_2 : R.color.blue;
         cardView.setCardBackgroundColor(ContextCompat.getColor(this, colorId));
 
         // Gán dữ liệu
@@ -153,12 +153,18 @@ public class XemKhoaHocActivity extends AppCompatActivity {
     public static class KhoaHoc {
         String ten, giangVien, boMon;
         int tienDo;
+        int soBaiHoc;
 
-        public KhoaHoc(String ten, String giangVien, String boMon, int tienDo) {
+        public KhoaHoc(String ten, String giangVien, String boMon, int tienDo, int soBaiHoc) { // Cập nhật constructor
             this.ten = ten;
             this.giangVien = giangVien;
             this.boMon = boMon;
             this.tienDo = tienDo;
+            this.soBaiHoc = soBaiHoc;
+        }
+
+        public KhoaHoc(String ten, String giangVien, String boMon, int tienDo) {
+            this(ten, giangVien, boMon, tienDo, 0);
         }
     }
 }
