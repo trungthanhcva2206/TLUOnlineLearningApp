@@ -2,8 +2,11 @@ package com.nhom1.tlulearningonline; // Đảm bảo thay đổi package này n�
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -15,7 +18,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +50,69 @@ public class HomeActivity extends AppCompatActivity { // Đã đổi tên lớp 
     private List<TeacherItem> teacherList; // Đã thống nhất tên là TeacherItem
 
     private BottomNavigationView bottomNavigationView;
+
+    private Handler sessionHandler;
+    private Runnable sessionCheckRunnable;
+
+    private void fetchUserInfo() {
+        SessionManager sessionManager = new SessionManager(this);
+        String userId = sessionManager.getUserId();
+
+        if (userId == null || userId.isEmpty()) {
+            Toast.makeText(this, "Không tìm thấy userId!", Toast.LENGTH_SHORT).show();
+            sessionManager.clearSession();
+            Intent intent = new Intent(HomeActivity.this, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+            return;
+        }
+
+        String url = "http://14.225.207.221:6060/mobile/users/" + userId;
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+        StringRequest request = new StringRequest(Request.Method.GET, url,
+                response -> {
+                    try {
+                        JSONObject user = new JSONObject(response);
+                        String fullName = user.optString("fullname", "Người dùng");
+                        String avatarUrl = user.optString("avatar_url", "");
+
+                        tvUserName.setText(fullName + " 👋");
+
+                        if (avatarUrl != null && !avatarUrl.isEmpty()) {
+                            Log.d("AvatarURL", avatarUrl);
+                            Glide.with(this)
+                                    .load(avatarUrl)
+                                    .placeholder(R.drawable.ic_avatar)
+                                    .error(R.drawable.ic_avatar)
+                                    .circleCrop()
+                                    .into(ivAvatar);
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(this, "Lỗi xử lý JSON!", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                error -> {
+                    if (error.networkResponse != null && error.networkResponse.statusCode == 401) {
+                        sessionManager.clearSession();
+                        Toast.makeText(this, "Phiên đăng nhập đã hết hạn!", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(HomeActivity.this, LoginActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        error.printStackTrace();
+                        Toast.makeText(this, "Lỗi kết nối tới máy chủ!", Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+
+        queue.add(request);
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +142,8 @@ public class HomeActivity extends AppCompatActivity { // Đã đổi tên lớp 
 
         // --- CHUẨN BỊ DỮ LIỆU MẪU ---
         setupDummyData();
+        fetchUserInfo();
+        setupSessionCheck();
 
         // --- CÀI ĐẶT RECYCLERVIEW KHÓA HỌC NỔI BẬT ---
         featuredCoursesAdapter = new FeaturedCoursesAdapter(featuredCoursesList);
@@ -149,6 +225,22 @@ public class HomeActivity extends AppCompatActivity { // Đã đổi tên lớp 
     /**
      * Tạo dữ liệu mẫu cho các danh sách khóa học nổi bật, khóa học đang học và giảng viên.
      */
+    private void setupSessionCheck() {
+        sessionHandler = new Handler(Looper.getMainLooper());
+        sessionCheckRunnable = () -> {
+            SessionManager sessionManager = new SessionManager(HomeActivity.this);
+            if (!sessionManager.isLoggedIn()) {
+                Toast.makeText(HomeActivity.this, "Phiên đăng nhập đã hết hạn!", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(HomeActivity.this, LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
+            } else {
+                sessionHandler.postDelayed(sessionCheckRunnable, 10000); // 10 giây kiểm tra lại
+            }
+        };
+        sessionHandler.postDelayed(sessionCheckRunnable, 10000); // bắt đầu sau 10 giây
+    }
     private void setupDummyData() {
         // Dữ liệu mẫu cho Khóa học nổi bật
         featuredCoursesList = new ArrayList<>();

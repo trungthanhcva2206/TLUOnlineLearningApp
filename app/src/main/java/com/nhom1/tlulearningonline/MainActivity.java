@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button btnChat, btnXemKhoaHoc, btnQuanLyKhoaHoc;
+    Button btnChat, btnXemKhoaHoc, btnQuanLyKhoaHoc, btnGV;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,6 +33,13 @@ public class MainActivity extends AppCompatActivity {
 
         btnQuanLyKhoaHoc.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, QuanLyKhoaHocActivity.class);
+            startActivity(intent);
+        });
+
+        btnGV = findViewById(R.id.btnGV);
+
+        btnGV.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, DanhSachGiangVienActivity.class);
             startActivity(intent);
         });
 
