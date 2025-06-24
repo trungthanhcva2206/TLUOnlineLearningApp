@@ -91,9 +91,18 @@
             android:id="@+id/layout_noi_dung"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="16dp"
             android:orientation="vertical">
 
+            <TextView
+                android:id="@+id/tv_khong_tim_thay"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Không tìm thấy khóa học nào"
+                android:textSize="16sp"
+                android:textColor="#FF0000"
+                android:gravity="center"
+                android:visibility="gone"
+                android:padding="24dp" />
             <!-- Tiêu đề 1 -->
             <TextView
                 android:layout_width="wrap_content"

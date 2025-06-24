@@ -2,11 +2,15 @@ package com.nhom1.tlulearningonline;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
@@ -20,13 +24,19 @@ public class XemKhoaHocActivity extends AppCompatActivity {
     ArrayList<KhoaHoc> khoaHocThamGia = new ArrayList<>();
     ArrayList<KhoaHoc> khoaHocDaLuu = new ArrayList<>();
 
+    EditText edtTimKiem;
+    TextView tvKhongTimThay;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_xem_khoa_hoc);
 
+        // Khởi tạo view sau khi setContentView
         layoutThamGia = findViewById(R.id.layout_khoa_hoc_tham_gia);
         layoutDaLuu = findViewById(R.id.layout_khoa_hoc_da_luu);
+        edtTimKiem = findViewById(R.id.edt_tim_kiem);
+        tvKhongTimThay = findViewById(R.id.tv_khong_tim_thay);
 
         // Dữ liệu mẫu
         khoaHocThamGia.add(new KhoaHoc("Tương tác người máy", "GV: Nguyễn Thị Thu Hương", "Bộ môn Công nghệ phần mềm", 80));
@@ -36,23 +46,57 @@ public class XemKhoaHocActivity extends AppCompatActivity {
 
         khoaHocDaLuu.add(new KhoaHoc("Khai phá dữ liệu", "GV: Lê Thị Tú Kiên", "Bộ môn Hệ thống thông tin", 80));
 
-        // Hiển thị các khóa học tham gia
+        // Hiển thị danh sách ban đầu
+        hienThiKhoaHoc();
+
+        // Xử lý tìm kiếm
+        edtTimKiem.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void afterTextChanged(Editable s) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                timKiemKhoaHoc(s.toString());
+            }
+        });
+    }
+
+    private void hienThiKhoaHoc() {
+        layoutThamGia.removeAllViews();
+        layoutDaLuu.removeAllViews();
+
         for (int i = 0; i < khoaHocThamGia.size(); i++) {
-            View itemView = createCard(khoaHocThamGia.get(i), false, i);
-            layoutThamGia.addView(itemView);
+            layoutThamGia.addView(createCard(khoaHocThamGia.get(i), false, i));
         }
 
-        // Hiển thị các khóa học đã lưu
         for (int i = 0; i < khoaHocDaLuu.size(); i++) {
-            View itemView = createCard(khoaHocDaLuu.get(i), true, i);
-            layoutDaLuu.addView(itemView);
+            layoutDaLuu.addView(createCard(khoaHocDaLuu.get(i), true, i));
+        }
+    }
+
+    private void timKiemKhoaHoc(String tuKhoa) {
+        layoutThamGia.removeAllViews();
+
+        int dem = 0;
+        for (int i = 0; i < khoaHocThamGia.size(); i++) {
+            KhoaHoc kh = khoaHocThamGia.get(i);
+            if (kh.ten.toLowerCase().contains(tuKhoa.toLowerCase())) {
+                layoutThamGia.addView(createCard(kh, false, i));
+                dem++;
+            }
+        }
+
+        if (dem == 0) {
+            tvKhongTimThay.setVisibility(View.VISIBLE);
+        } else {
+            tvKhongTimThay.setVisibility(View.GONE);
         }
     }
 
     private View createCard(KhoaHoc kh, boolean daLuu, int position) {
-        View view = LayoutInflater.from(this).inflate(R.layout.item_khoa_hoc_sv, null);
+        View view = LayoutInflater.from(this).inflate(R.layout.item_khoa_hoc_sv_blue, null);
 
-        // Đổi màu nền cho thẻ
+        // Đổi màu nền
         CardView cardView = (CardView) view;
         int colorId = (position % 2 == 0) ? R.color.blue_3 : R.color.blue;
         cardView.setCardBackgroundColor(ContextCompat.getColor(this, colorId));
@@ -66,7 +110,7 @@ public class XemKhoaHocActivity extends AppCompatActivity {
 
         btnSave.setOnClickListener(v -> {
             if (daLuu) {
-                layoutDaLuu.removeView((View) view.getParent()); // Xóa wrapper
+                layoutDaLuu.removeView((View) view.getParent());
                 khoaHocDaLuu.remove(kh);
             } else {
                 khoaHocDaLuu.add(kh);
@@ -74,7 +118,7 @@ public class XemKhoaHocActivity extends AppCompatActivity {
             }
         });
 
-        // Mở chi tiết khóa học khi click vào card
+        // Mở chi tiết
         view.setOnClickListener(v -> {
             Intent intent = new Intent(XemKhoaHocActivity.this, ChiTietKhoaHocActivity.class);
             intent.putExtra("tieu_de", kh.ten);
@@ -91,7 +135,7 @@ public class XemKhoaHocActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        // ➕ Tạo wrapper để thêm khoảng cách dưới cho mỗi thẻ
+        // ➕ Thêm khoảng cách dưới cho mỗi thẻ
         LinearLayout wrapper = new LinearLayout(this);
         wrapper.setOrientation(LinearLayout.VERTICAL);
 
@@ -99,7 +143,7 @@ public class XemKhoaHocActivity extends AppCompatActivity {
         int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 220, getResources().getDisplayMetrics());
 
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(width, height);
-        params.setMargins(4, 4, 0, 32);
+        params.setMargins(4, 4, 4, 32);
         wrapper.setLayoutParams(params);
         wrapper.addView(view);
 
