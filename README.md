@@ -8,9 +8,9 @@ Repo này chứa mã nguồn cho Ứng dụng học trực tuyến TLULearning, 
 
 ## Nhóm sinh viên thực hiện dự án
 
-- [Nguyen Thi Phuong Anh](https://github.com/ntpa812) - 2251161942 - 64HTTT.NB
-- [Tran Hung Anh](https://github.com/hunganh7204) - 2251061712 - 64CNTT.NB
-- [Nguyen Le Trung Thanh](https://github.com/trungthanhcva2206) - 2251061885 - 64CNTT.NB
+- [Nguuyễn Thị Phương Anh](https://github.com/ntpa812) - 2251161942 - 64HTTT.NB
+- [Trần Hùng Anh](https://github.com/hunganh7204) - 2251061712 - 64CNTT.NB
+- [Nguyễn Lê Trung Thành](https://github.com/trungthanhcva2206) - 2251061885 - 64CNTT.NB
 
 ### NOTE
 
