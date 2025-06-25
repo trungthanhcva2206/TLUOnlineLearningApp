@@ -72,9 +72,6 @@ Repo này chứa mã nguồn cho Ứng dụng học trực tuyến TLULearning, 
 
 ## Thiết kế cơ sở dữ liệu
 
-Cơ sở dữ liệu của ứng dụng được thiết kế dựa trên mô hình quan hệ, được chuẩn hóa thành dạng chuẩn BCNF (Boyce-Codd Normal Form) để giảm thiểu sự dư thừa dữ liệu và các bất thường khi cập nhật
-
-**Các thực thể và thuộc tính chính**:
 * `users`: `user_id` (PK), `username`, `password`, `role`, `avatar_url`, `full_name`, `status`, `created_at`, `updated_at`
 * `departments`: `department_id` (PK), `department_name`
 * `courses`: `course_id` (PK), `course_name`, `description`, `thumbnail_url`, `teacher_id` (FK đến `users`), `department_id` (FK đến `departments`), `status`, `created_at`, `updated_at`
