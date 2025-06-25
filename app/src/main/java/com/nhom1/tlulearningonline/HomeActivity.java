@@ -162,6 +162,7 @@ public class HomeActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        fetchGiangVien();
         edtSearch.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -229,73 +230,125 @@ public class HomeActivity extends AppCompatActivity {
         inProgressCoursesList.clear();
         teacherList.clear();
 
-        // Dữ liệu mẫu cho Khóa học nổi bật - Đã cập nhật để bao gồm soBaiHoc
 
-
-        // Dữ liệu mẫu cho Giảng viên
-        teacherList.add(new TeacherItem("Nguyễn Văn Nam", R.drawable.gv_ng_van_nam_portrait));
-        teacherList.add(new TeacherItem("Nguyễn Tu Trung", R.drawable.gv_ng_tu_trung_portrait));
-        teacherList.add(new TeacherItem("Nguyễn Thị Thu Hương", R.drawable.gv_ng_thi_thu_huong));
-        teacherList.add(new TeacherItem("Trương Xuân Nam", R.drawable.gv_truong_xuan_nam));
     }
     private void fetchLessonsAndCourses() {
         String lessonUrl = "http://14.225.207.221:6060/mobile/lessons";
         String courseUrl = "http://14.225.207.221:6060/mobile/courses";
+        String registrationUrl = "http://14.225.207.221:6060/mobile/course-registrations";
+
+        SessionManager sessionManager = new SessionManager(this);
+        String userId = sessionManager.getUserId();
+        if (userId == null) return;
+
         RequestQueue queue = Volley.newRequestQueue(this);
 
-        JsonArrayRequest lessonRequest = new JsonArrayRequest(Request.Method.GET, lessonUrl, null,
-                lessonResponse -> {
-                    Map<String, Integer> lessonCountMap = new HashMap<>();
-
-                    for (int i = 0; i < lessonResponse.length(); i++) {
+        // 1. Gọi API để lấy danh sách đăng ký khóa học
+        JsonArrayRequest registrationRequest = new JsonArrayRequest(Request.Method.GET, registrationUrl, null,
+                registrationResponse -> {
+                    List<String> registeredCourseIds = new ArrayList<>();
+                    for (int i = 0; i < registrationResponse.length(); i++) {
                         try {
-                            JSONObject lesson = lessonResponse.getJSONObject(i);
-                            String courseId = lesson.getString("courseId");
-                            lessonCountMap.put(courseId, lessonCountMap.getOrDefault(courseId, 0) + 1);
+                            JSONObject obj = registrationResponse.getJSONObject(i);
+                            if (userId.equals(obj.getString("userId"))) {
+                                registeredCourseIds.add(obj.getString("courseId"));
+                            }
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
                     }
 
-                    JsonArrayRequest courseRequest = new JsonArrayRequest(Request.Method.GET, courseUrl, null,
-                            courseResponse -> {
-                                featuredCoursesList.clear();
-                                for (int i = 0; i < courseResponse.length(); i++) {
+                    // 2. Tiếp tục gọi lesson và course
+                    JsonArrayRequest lessonRequest = new JsonArrayRequest(Request.Method.GET, lessonUrl, null,
+                            lessonResponse -> {
+                                Map<String, Integer> lessonCountMap = new HashMap<>();
+                                for (int i = 0; i < lessonResponse.length(); i++) {
                                     try {
-                                        JSONObject course = courseResponse.getJSONObject(i);
-                                        String id = course.getString("id");
-                                        String title = course.getString("title");
-                                        String teacherName = course.optString("teacherName", "Chưa rõ");
-                                        String departmentName = course.optString("departmentName", "Chưa rõ");
-                                        String des = course.optString("description", "Chưa rõ");
-
-                                        int soBaiHoc = lessonCountMap.getOrDefault(id, 0);
-
-                                        CourseItem item = new CourseItem(id, title, teacherName, departmentName,des, soBaiHoc);
-                                        featuredCoursesList.add(item);
-
+                                        JSONObject lesson = lessonResponse.getJSONObject(i);
+                                        String courseId = lesson.getString("courseId");
+                                        lessonCountMap.put(courseId, lessonCountMap.getOrDefault(courseId, 0) + 1);
                                     } catch (JSONException e) {
                                         e.printStackTrace();
                                     }
                                 }
 
-                                featuredCoursesAdapter.notifyDataSetChanged();
+                                JsonArrayRequest courseRequest = new JsonArrayRequest(Request.Method.GET, courseUrl, null,
+                                        courseResponse -> {
+                                            featuredCoursesList.clear();
+                                            for (int i = 0; i < courseResponse.length(); i++) {
+                                                try {
+                                                    JSONObject course = courseResponse.getJSONObject(i);
+                                                    String id = course.getString("id");
+                                                    String title = course.getString("title");
+                                                    String teacherName = course.optString("teacherName", "Chưa rõ");
+                                                    String departmentName = course.optString("departmentName", "Chưa rõ");
+                                                    String des = course.optString("description", "Chưa rõ");
+
+                                                    int soBaiHoc = lessonCountMap.getOrDefault(id, 0);
+
+                                                    CourseItem item = new CourseItem(id, title, teacherName, departmentName, des, soBaiHoc);
+                                                    item.setRegistered(registeredCourseIds.contains(id)); // <-- đánh dấu đã đăng ký
+
+                                                    featuredCoursesList.add(item);
+                                                } catch (JSONException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
+                                            featuredCoursesAdapter.notifyDataSetChanged();
+                                        },
+                                        error -> {
+                                            Toast.makeText(this, "Lỗi lấy danh sách khoá học!", Toast.LENGTH_SHORT).show();
+                                            error.printStackTrace();
+                                        });
+
+                                queue.add(courseRequest);
                             },
                             error -> {
-                                Toast.makeText(this, "Lỗi lấy danh sách khoá học!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(this, "Lỗi lấy danh sách bài học!", Toast.LENGTH_SHORT).show();
                                 error.printStackTrace();
-                            }
-                    );
+                            });
 
-                    queue.add(courseRequest);
+                    queue.add(lessonRequest);
                 },
                 error -> {
-                    Toast.makeText(this, "Lỗi lấy danh sách bài học!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Lỗi khi lấy danh sách đăng ký!", Toast.LENGTH_SHORT).show();
                     error.printStackTrace();
-                }
-        );
+                });
 
-        queue.add(lessonRequest);
+        queue.add(registrationRequest);
     }
+
+    private void fetchGiangVien() {
+        String url = "http://14.225.207.221:6060/mobile/users/role?role=TEACHER";
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null,
+                response -> {
+                    teacherList.clear(); // Xoá danh sách cũ
+
+                    for (int i = 0; i < response.length(); i++) {
+                        try {
+                            JSONObject obj = response.getJSONObject(i);
+                            String ten = obj.optString("fullname", "Chưa rõ");
+                            String avatar = obj.optString("avatar_url", "");
+
+                            teacherList.add(new TeacherItem(ten, avatar));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    teachersAdapter.notifyDataSetChanged();
+                },
+                error -> {
+                    Toast.makeText(this, "Lỗi khi tải danh sách giảng viên!", Toast.LENGTH_SHORT).show();
+                    error.printStackTrace();
+                });
+
+        queue.add(request);
+    }
+
+
 
 }

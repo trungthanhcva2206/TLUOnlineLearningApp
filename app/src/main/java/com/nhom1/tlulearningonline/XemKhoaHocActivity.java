@@ -35,6 +35,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class XemKhoaHocActivity extends AppCompatActivity {
 
@@ -129,12 +130,8 @@ public class XemKhoaHocActivity extends AppCompatActivity {
         fetchUserInfo();
         setupSessionCheck();
 
-        khoaHocThamGia.add(new KhoaHoc("Tương tác người máy", "GV: Nguyễn Thị Thu Hương", "Bộ môn Công nghệ phần mềm", 80, 15));
-        khoaHocThamGia.add(new KhoaHoc("Công nghệ Web", "GV: Nguyễn Tu Trung", "Bộ môn Hệ thống thông tin", 25, 10));
-        khoaHocThamGia.add(new KhoaHoc("Lập trình Java", "GV: Trần Văn B", "Bộ môn Công nghệ phần mềm", 60, 20));
-        khoaHocThamGia.add(new KhoaHoc("Cơ sở dữ liệu", "GV: Trần Hồng Diệp", "Bộ môn Hệ thống thông tin", 45, 12));
+        fetchKhoaHocThamGia();
 
-        khoaHocDaLuu.add(new KhoaHoc("Khai phá dữ liệu", "GV: Lê Thị Tú Kiên", "Bộ môn Hệ thống thông tin", 80, 8));
 
         hienThiKhoaHoc();
 
@@ -182,15 +179,14 @@ public class XemKhoaHocActivity extends AppCompatActivity {
         layoutDaLuu.removeAllViews();
 
         for (int i = 0; i < khoaHocThamGia.size(); i++) {
-            // For "Khóa học đã tham gia", daLuu is false, so it will inflate item_khoa_hoc_sv_progress
-            layoutThamGia.addView(createCard(khoaHocThamGia.get(i), false, i));
+            layoutThamGia.addView(createCard(khoaHocThamGia.get(i), true, i));
         }
 
         for (int i = 0; i < khoaHocDaLuu.size(); i++) {
-            // For "Khóa học đã lưu", daLuu is true, so it will inflate item_khoa_hoc_sv
             layoutDaLuu.addView(createCard(khoaHocDaLuu.get(i), true, i));
         }
     }
+
 
     private void timKiemKhoaHoc(String tuKhoa) {
         layoutThamGia.removeAllViews();
@@ -271,8 +267,9 @@ public class XemKhoaHocActivity extends AppCompatActivity {
 
         view.setOnClickListener(v -> {
             Intent intent = new Intent(XemKhoaHocActivity.this, ChiTietKhoaHocActivity.class);
+            intent.putExtra("course_id", kh.id);
             intent.putExtra("tieu_de", kh.ten);
-            intent.putExtra("mo_ta", "Đây là môn học về " + kh.boMon.toLowerCase() + ", được giảng dạy bởi " + kh.giangVien);
+            intent.putExtra("des", kh.des);
             intent.putExtra("tac_gia", kh.giangVien);
             intent.putExtra("so_bai", kh.soBaiHoc);
 
@@ -316,20 +313,133 @@ public class XemKhoaHocActivity extends AppCompatActivity {
         sessionHandler.postDelayed(sessionCheckRunnable, 10000); // bắt đầu sau 10 giây
     }
     public static class KhoaHoc {
-        String ten, giangVien, boMon;
+        String id, ten, giangVien, boMon, des;
         int tienDo;
         int soBaiHoc;
 
-        public KhoaHoc(String ten, String giangVien, String boMon, int tienDo, int soBaiHoc) {
+        public KhoaHoc(String id, String ten, String giangVien, String boMon, int tienDo, int soBaiHoc, String des) {
+            this.id = id;
             this.ten = ten;
             this.giangVien = giangVien;
             this.boMon = boMon;
             this.tienDo = tienDo;
             this.soBaiHoc = soBaiHoc;
+            this.des = des;
         }
 
-        public KhoaHoc(String ten, String giangVien, String boMon, int tienDo) {
-            this(ten, giangVien, boMon, tienDo, 0); // Mặc định số bài học là 0
+        public String getDes() {
+            return des;
         }
+
+        public String getId() { return id; }
+        public String getTen() { return ten; }
+        public String getGiangVien() { return giangVien; }
+        public String getBoMon() { return boMon; }
+        public int getSoBaiHoc() { return soBaiHoc; }
     }
+
+    private void fetchKhoaHocThamGia() {
+        SessionManager sessionManager = new SessionManager(this);
+        String userId = sessionManager.getUserId();
+        if (userId == null || userId.isEmpty()) return;
+
+        String regUrl = "http://14.225.207.221:6060/mobile/course-registrations";
+        String courseUrl = "http://14.225.207.221:6060/mobile/courses";
+        String lessonUrl = "http://14.225.207.221:6060/mobile/lessons";
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+
+        // Step 1: Lấy danh sách bài học
+        Utf8StringRequest lessonRequest = new Utf8StringRequest(Request.Method.GET, lessonUrl,
+                lessonResponse -> {
+                    try {
+                        org.json.JSONArray lessonArray = new org.json.JSONArray(lessonResponse);
+                        HashMap<String, Integer> lessonCountMap = new HashMap<>();
+
+                        for (int i = 0; i < lessonArray.length(); i++) {
+                            JSONObject lesson = lessonArray.getJSONObject(i);
+                            String courseId = lesson.getString("courseId");
+                            int currentCount = lessonCountMap.getOrDefault(courseId, 0);
+                            lessonCountMap.put(courseId, currentCount + 1);
+                        }
+
+                        // Step 2: Lấy danh sách đăng ký
+                        Utf8StringRequest regRequest = new Utf8StringRequest(Request.Method.GET, regUrl,
+                                regResponse -> {
+                                    try {
+                                        ArrayList<String> courseIds = new ArrayList<>();
+                                        org.json.JSONArray regArray = new org.json.JSONArray(regResponse);
+
+                                        for (int i = 0; i < regArray.length(); i++) {
+                                            JSONObject reg = regArray.getJSONObject(i);
+                                            if (userId.equals(reg.getString("userId"))) {
+                                                courseIds.add(reg.getString("courseId"));
+                                            }
+                                        }
+
+                                        // Step 3: Lấy thông tin khóa học
+                                        Utf8StringRequest courseRequest = new Utf8StringRequest(Request.Method.GET, courseUrl,
+                                                courseResponse -> {
+                                                    try {
+                                                        org.json.JSONArray courseArray = new org.json.JSONArray(courseResponse);
+                                                        khoaHocThamGia.clear();
+
+                                                        for (int i = 0; i < courseArray.length(); i++) {
+                                                            JSONObject course = courseArray.getJSONObject(i);
+                                                            String id = course.getString("id");
+
+                                                            if (courseIds.contains(id)) {
+                                                                String title = course.getString("title");
+                                                                String teacher = course.optString("teacherName", "Chưa rõ");
+                                                                String department = course.optString("departmentName", "Chưa rõ");
+                                                                String des = course.optString("description", "Chưa rõ");
+                                                                int lessonCount = lessonCountMap.getOrDefault(id, 0);
+
+
+                                                                KhoaHoc kh = new KhoaHoc(id, title, teacher, department, 0, lessonCount,des);
+                                                                khoaHocThamGia.add(kh);
+                                                            }
+                                                        }
+
+                                                        hienThiKhoaHoc(); // Gọi để hiển thị
+
+                                                    } catch (JSONException e) {
+                                                        e.printStackTrace();
+                                                        Toast.makeText(this, "Lỗi xử lý courses!", Toast.LENGTH_SHORT).show();
+                                                    }
+                                                },
+                                                error -> {
+                                                    Toast.makeText(this, "Lỗi khi gọi /courses", Toast.LENGTH_SHORT).show();
+                                                    error.printStackTrace();
+                                                });
+
+                                        queue.add(courseRequest);
+
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                        Toast.makeText(this, "Lỗi xử lý registrations!", Toast.LENGTH_SHORT).show();
+                                    }
+                                },
+                                error -> {
+                                    Toast.makeText(this, "Lỗi khi gọi /course-registrations", Toast.LENGTH_SHORT).show();
+                                    error.printStackTrace();
+                                });
+
+                        queue.add(regRequest);
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(this, "Lỗi xử lý lessons!", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                error -> {
+                    Toast.makeText(this, "Lỗi khi gọi /lessons", Toast.LENGTH_SHORT).show();
+                    error.printStackTrace();
+                });
+
+        queue.add(lessonRequest);
+    }
+
+
+
 }

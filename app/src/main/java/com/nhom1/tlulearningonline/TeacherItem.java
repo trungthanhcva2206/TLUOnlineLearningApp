@@ -6,14 +6,14 @@ package com.nhom1.tlulearningonline;
  */
 public class TeacherItem {
     private String name;
-    private int avatarResId;
+    private String avatarResId;
     /**
      * Constructs a new TeacherItem.
      *
      * @param name        The name of the teacher.
      * @param avatarResId The resource ID of the teacher's avatar drawable.
      */
-    public TeacherItem(String name, int avatarResId) {
+    public TeacherItem(String name, String avatarResId) {
         this.name = name;
         this.avatarResId = avatarResId;
     }
@@ -22,7 +22,7 @@ public class TeacherItem {
         return name;
     }
 
-    public int getAvatarResId() {
+    public String getAvatarResId() {
         return avatarResId;
     }
 }
