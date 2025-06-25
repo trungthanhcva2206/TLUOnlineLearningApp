@@ -37,7 +37,7 @@ Repo này chứa mã nguồn cho Ứng dụng học trực tuyến TLULearning, 
 ### Tính năng của Quản trị viên:
 * **Quản lý tài khoản người dùng**: Cấp phát và quản lý tài khoản cho sinh viên và giảng viên (tạo tài khoản mới, xem danh sách tài khoản, cập nhật thông tin tài khoản, khóa tài khoản)
 
-### Tính năng chung (Đăng nhập và Chat):
+### Tính năng chung:
 * **Đăng nhập**: Người dùng có thể đăng nhập vào hệ thống bằng tài khoản của mình để sử dụng các chức năng tương ứng với quyền hạn của họ
 * **Trò chuyện nhóm**: Tham gia trao đổi thông tin chung trong môi trường trò chuyện nhóm theo thời gian thực
 
