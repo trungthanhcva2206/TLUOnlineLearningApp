@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -13,9 +14,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -28,6 +31,7 @@ public class SuaKhoaHocActivity extends AppCompatActivity {
     private TextInputEditText edtTenKhoaHoc, edtMoTaKhoaHoc;
     private Button btnThemBaiHoc, btnCapNhatKhoaHoc;
     private LinearLayout layoutDanhSachBaiHoc;
+    private  BottomNavigationView bottomNavigationView;
 
     private final List<BaiHoc> danhSachBaiHoc = new ArrayList<>();
     private static final int REQUEST_THEM_BAI_HOC = 1;
@@ -45,6 +49,7 @@ public class SuaKhoaHocActivity extends AppCompatActivity {
         btnThemBaiHoc = findViewById(R.id.btn_them_bai_hoc);
         btnCapNhatKhoaHoc = findViewById(R.id.btn_sua_khoa_hoc);
         layoutDanhSachBaiHoc = findViewById(R.id.layout_danh_sach_bai_hoc);
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         ImageView btnBack = findViewById(R.id.btn_back);
         btnBack.setOnClickListener(v -> finish());
@@ -109,6 +114,39 @@ public class SuaKhoaHocActivity extends AppCompatActivity {
                 resultIntent.putStringArrayListExtra("ds_bai_hoc", dsTenBaiHoc);
                 setResult(RESULT_OK, resultIntent);
                 finish();
+            }
+        });
+
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                int itemId = item.getItemId();
+                if (itemId == R.id.nav_home) {
+                    Intent intent = new Intent(SuaKhoaHocActivity.this, HomeGVActivity.class); // Assuming student home is default
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                    // finish(); // Remove finish() here unless you explicitly want to remove the current activity from stack
+                    return true;
+                } else if (itemId == R.id.nav_forum) {
+                    Intent intent = new Intent(SuaKhoaHocActivity.this, GroupChatActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                    // finish();
+                    return true;
+                } else if (itemId == R.id.nav_courses) {
+                    Intent intent = SessionManager.getCoursesActivityIntent(SuaKhoaHocActivity.this); // Use helper
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                    // finish();
+                    return true;
+                } else if (itemId == R.id.nav_profile) {
+                    Intent intent = new Intent(SuaKhoaHocActivity.this, UserProfileActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                    // finish();
+                    return true;
+                }
+                return false;
             }
         });
     }

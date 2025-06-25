@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -14,8 +15,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +32,7 @@ public class ThemBaiHocActivity extends AppCompatActivity {
     private EditText edtTenBaiHoc;
     private Button btnThemVideo, btnThemTaiLieu, btnThemBaiHoc;
     private LinearLayout layoutDsVideo, layoutDsPdf;
+    private BottomNavigationView bottomNavigationView;
 
     private final List<Uri> danhSachVideo = new ArrayList<>();
     private final List<Uri> danhSachTaiLieu = new ArrayList<>();
@@ -36,6 +41,8 @@ public class ThemBaiHocActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_them_bai_hoc);
+
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         edtTenBaiHoc = findViewById(R.id.edt_ten_bai_hoc);
         btnThemVideo = findViewById(R.id.btn_them_video);
@@ -88,6 +95,39 @@ public class ThemBaiHocActivity extends AppCompatActivity {
             resultIntent.putExtra("tenTaiLieu", tenTaiLieu.toString());
             setResult(Activity.RESULT_OK, resultIntent);
             finish();
+        });
+
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                int itemId = item.getItemId();
+                if (itemId == R.id.nav_home) {
+                    Intent intent = new Intent(ThemBaiHocActivity.this, HomeGVActivity.class); // Assuming student home is default
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                    // finish(); // Remove finish() here unless you explicitly want to remove the current activity from stack
+                    return true;
+                } else if (itemId == R.id.nav_forum) {
+                    Intent intent = new Intent(ThemBaiHocActivity.this, GroupChatActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                    // finish();
+                    return true;
+                } else if (itemId == R.id.nav_courses) {
+                    Intent intent = SessionManager.getCoursesActivityIntent(ThemBaiHocActivity.this); // Use helper
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                    // finish();
+                    return true;
+                } else if (itemId == R.id.nav_profile) {
+                    Intent intent = new Intent(ThemBaiHocActivity.this, UserProfileActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                    // finish();
+                    return true;
+                }
+                return false;
+            }
         });
     }
 

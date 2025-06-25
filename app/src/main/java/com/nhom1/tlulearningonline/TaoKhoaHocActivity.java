@@ -46,6 +46,7 @@ public class TaoKhoaHocActivity extends AppCompatActivity {
         btnThemBaiHoc = findViewById(R.id.btn_them_bai_hoc);
         btnTaoKhoaHoc = findViewById(R.id.btn_tao_khoa_hoc);
         layoutDanhSachBaiHoc = findViewById(R.id.layout_danh_sach_bai_hoc);
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         ImageView btnBack = findViewById(R.id.btn_back);
         btnBack.setOnClickListener(v -> finish());
@@ -125,7 +126,7 @@ public class TaoKhoaHocActivity extends AppCompatActivity {
                 return false;
             }
         });
-        bottomNavigationView.setSelectedItemId(R.id.nav_courses);
+
     }
 
     @Override
