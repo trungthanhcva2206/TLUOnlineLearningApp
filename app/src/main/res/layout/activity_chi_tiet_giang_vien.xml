@@ -51,8 +51,7 @@
                 android:layout_height="32dp"
                 android:src="@drawable/ic_avatar"
                 android:background="@drawable/bg_avatar_circle"
-                android:scaleType="centerCrop"
-                app:tint="@color/white"/>
+                android:scaleType="centerCrop" />
         </LinearLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -97,7 +96,7 @@
                 android:id="@+id/tv_bo_mon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Hệ thống thông tin"
+                android:text="Đại học Thuỷ Lợi"
                 android:textSize="14sp"
                 android:textColor="@color/blue"
                 android:background="@drawable/bg_filter_chip"

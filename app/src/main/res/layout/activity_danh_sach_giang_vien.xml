@@ -60,8 +60,7 @@
                     android:layout_height="32dp"
                     android:src="@drawable/ic_avatar"
                     android:background="@drawable/bg_avatar_circle"
-                    android:scaleType="centerCrop"
-                    app:tint="@color/white"/>
+                    android:scaleType="centerCrop" />
             </LinearLayout>
 
             <!-- Search -->
@@ -98,53 +97,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Bộ lọc bộ môn -->
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:scrollbars="none"
-                android:overScrollMode="never"
-                android:layout_marginBottom="24dp">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        style="@style/Widget.MaterialComponents.Chip.Filter"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Công nghệ phần mềm"
-                        android:background="@drawable/bg_filter_chip"
-                        android:textColor="@color/blue"
-                        android:paddingHorizontal="16dp"
-                        android:paddingVertical="8dp"
-                        android:layout_marginEnd="8dp" />
-
-                    <TextView
-                        style="@style/Widget.MaterialComponents.Chip.Filter"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Hệ thống thông tin"
-                        android:background="@drawable/bg_filter_chip"
-                        android:textColor="@color/blue"
-                        android:paddingHorizontal="16dp"
-                        android:paddingVertical="8dp"
-                        android:layout_marginEnd="8dp"/>
-
-                    <TextView
-                        style="@style/Widget.MaterialComponents.Chip.Filter"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Mạng và An toàn thông tin"
-                        android:background="@drawable/bg_filter_chip"
-                        android:textColor="@color/blue"
-                        android:paddingHorizontal="16dp"
-                        android:paddingVertical="8dp"
-                        android:layout_marginEnd="8dp"/>
-                </LinearLayout>
-            </HorizontalScrollView>
 
             <!-- Danh sách giảng viên -->
             <androidx.recyclerview.widget.RecyclerView
