@@ -1,5 +1,6 @@
-package com.nhom1.tlulearningonline.adapters;
+package com.nhom1.tlulearningonline;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.nhom1.tlulearningonline.ChiTietKhoaHocActivity;
 import com.nhom1.tlulearningonline.R;
 import com.nhom1.tlulearningonline.CourseItemGV;
 
@@ -38,8 +40,15 @@ public class FeaturedCoursesGVAdapter extends RecyclerView.Adapter<FeaturedCours
         holder.btnLessonCount.setText(course.getLessonCount() + " bài học");
 
         holder.itemView.setOnClickListener(v -> {
-            Toast.makeText(v.getContext(), "Mở khóa học: " + course.getTitle(), Toast.LENGTH_SHORT).show();
-            // Intent để mở ChiTietKhoaHocActivity
+            Intent intent = new Intent(v.getContext(), ChiTietKhoaHocActivity.class);
+
+            intent.putExtra("course_id", course.getId());
+            intent.putExtra("tieu_de", course.getTitle());
+            intent.putExtra("des", course.getDescription());
+            intent.putExtra("tac_gia", course.getTeacherName());
+            intent.putExtra("so_bai", course.getLessonCount());
+
+            v.getContext().startActivity(intent);
         });
     }
 

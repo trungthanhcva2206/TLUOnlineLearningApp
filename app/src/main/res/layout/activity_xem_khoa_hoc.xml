@@ -129,16 +129,7 @@
                 android:layout_marginTop="16dp"
                 android:gravity="center_horizontal" />
 
-            <!-- Tiêu đề 2 -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Khóa học đã lưu"
-                android:textStyle="bold"
-                android:textSize="18sp"
-                android:textColor="#000000"
-                android:paddingVertical="8dp"
-                android:layout_marginTop="24dp" />
+
 
             <!-- Danh sách ngang -->
             <HorizontalScrollView

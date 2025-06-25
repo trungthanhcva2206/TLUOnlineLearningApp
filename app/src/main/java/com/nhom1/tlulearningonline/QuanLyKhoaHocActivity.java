@@ -117,6 +117,11 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        loadKhoaHocFromApi();
+    }
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quan_ly_khoa_hoc);
@@ -221,25 +226,23 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
 
         CustomViewBinder.bind(itemView, kh);
 
-        ImageView btnView = itemView.findViewById(R.id.btn_view);
         ImageView btnEdit = itemView.findViewById(R.id.btn_edit);
-        btnView.setTag(false);
 
-        btnView.setOnClickListener(v -> showConfirmationDialog(itemView, btnView, btnEdit));
 
         btnEdit.setOnClickListener(v -> {
+            viTriDangSua = position;
             Intent intent = new Intent(QuanLyKhoaHocActivity.this, SuaKhoaHocActivity.class);
-            intent.putExtra("course_id", kh.id);
-            startActivity(intent);
+            intent.putExtra("course_id", kh.id); // truyền id
+            startActivityForResult(intent, REQUEST_SUA_KHOA_HOC);
         });
 
         itemView.setOnClickListener(v -> {
             Intent intent = new Intent(QuanLyKhoaHocActivity.this, ChiTietKhoaHocActivity.class);
+            intent.putExtra("course_id", kh.id);
             intent.putExtra("tieu_de", kh.ten);
-            intent.putExtra("mo_ta", kh.moTa);
-            intent.putExtra("tac_gia", "GV. Nguyễn Văn A");
+            intent.putExtra("des", kh.moTa);
+            intent.putExtra("tac_gia", kh.tenGV);
             intent.putExtra("so_bai", kh.dsBaiHoc.size());
-            intent.putStringArrayListExtra("ds_bai_hoc", kh.dsBaiHoc);
             startActivity(intent);
         });
 
@@ -319,18 +322,10 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
             if (dsBaiHoc == null) dsBaiHoc = new ArrayList<>();
             if (requestCode == REQUEST_TAO_KHOA_HOC) {
                 KhoaHoc khoaHocMoi = new KhoaHoc("0", ten, moTa, "GV. Nguyễn Văn A", dsBaiHoc);
-                danhSachDayDu.add(khoaHocMoi);
-                createKhoaHocView(khoaHocMoi, danhSachDayDu.size() - 1);
-            } else if (requestCode == REQUEST_SUA_KHOA_HOC && viTriDangSua != -1) {
-                KhoaHoc khoaHoc = danhSachDayDu.get(viTriDangSua);
-                khoaHoc.ten = ten;
-                khoaHoc.moTa = moTa;
-                khoaHoc.dsBaiHoc = dsBaiHoc;
-                layoutDsKhoaHoc.removeAllViews();
-                for (int i = 0; i < danhSachDayDu.size(); i++) {
-                    createKhoaHocView(danhSachDayDu.get(i), i);
-                }
-                viTriDangSua = -1;
+                danhSach.add(khoaHocMoi);
+                addKhoaHocToLayout(khoaHocMoi, danhSach.size() - 1);
+            } else if (requestCode == REQUEST_SUA_KHOA_HOC && data.getBooleanExtra("course_updated", false)) {
+                loadKhoaHocFromApi();
             }
         }
     }
@@ -367,7 +362,7 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
         }
 
         // B1: Lấy toàn bộ lessons
-        StringRequest lessonRequest = new StringRequest(Request.Method.GET, urlLessons,
+        Utf8StringRequest  lessonRequest = new Utf8StringRequest (Request.Method.GET, urlLessons,
                 response -> {
                     try {
                         HashMap<String, ArrayList<String>> lessonsMap = new HashMap<>();
@@ -380,7 +375,7 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
                         }
 
                         // B2: Lấy danh sách khóa học
-                        StringRequest courseRequest = new StringRequest(Request.Method.GET, urlCourses,
+                        Utf8StringRequest  courseRequest = new Utf8StringRequest (Request.Method.GET, urlCourses,
                                 courseResponse -> {
                                     try {
                                         danhSachDayDu.clear();
@@ -391,7 +386,6 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
                                             JSONObject obj = courseArray.getJSONObject(i);
                                             String teacherId = obj.getString("teacherId");
 
-                                            // ❗❗❗ CHỈ LẤY CÁC KHÓA CỦA GIẢNG VIÊN ĐANG ĐĂNG NHẬP
                                             if (!userId.equals(teacherId)) continue;
 
                                             String id = obj.getString("id");
