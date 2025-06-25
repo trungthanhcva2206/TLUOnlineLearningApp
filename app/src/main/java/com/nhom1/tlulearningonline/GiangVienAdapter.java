@@ -12,6 +12,7 @@ import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList; // Import ArrayList
 import java.util.List;
 
 import com.bumptech.glide.Glide;
@@ -20,7 +21,7 @@ import com.nhom1.tlulearningonline.GiangVien;
 
 public class GiangVienAdapter extends RecyclerView.Adapter<GiangVienAdapter.GiangVienViewHolder> {
 
-    private final List<GiangVien> danhSachGiangVien;
+    private List<GiangVien> danhSachGiangVien;
     private final OnItemClickListener listener;
 
     public interface OnItemClickListener {
@@ -44,7 +45,6 @@ public class GiangVienAdapter extends RecyclerView.Adapter<GiangVienAdapter.Gian
     public void onBindViewHolder(@NonNull GiangVienViewHolder holder, int position) {
         GiangVien giangVien = danhSachGiangVien.get(position);
         holder.tvTenGiangVien.setText(giangVien.getFullname());
-//        holder.ivAvatar.setImageResource(giangVien.getAvatarResId());
 
         Glide.with(holder.ivAvatar.getContext())
                 .load(giangVien.getAvatarUrl())
@@ -66,6 +66,17 @@ public class GiangVienAdapter extends RecyclerView.Adapter<GiangVienAdapter.Gian
         return danhSachGiangVien.size();
     }
 
+    // --- BẠN CẦN THÊM PHƯƠNG THỨC NÀY VÀO ---
+    /**
+     * Cập nhật danh sách hiển thị trong adapter với một danh sách đã được lọc.
+     * @param filteredList Danh sách giảng viên đã được lọc.
+     */
+    public void filterList(List<GiangVien> filteredList) {
+        this.danhSachGiangVien = filteredList;
+        notifyDataSetChanged();
+    }
+    // ------------------------------------------
+
     public static class GiangVienViewHolder extends RecyclerView.ViewHolder {
         ImageView ivAvatar;
         TextView tvTenGiangVien, tvBoMon;
@@ -74,10 +85,11 @@ public class GiangVienAdapter extends RecyclerView.Adapter<GiangVienAdapter.Gian
         public GiangVienViewHolder(@NonNull View itemView) {
             super(itemView);
             ivAvatar = itemView.findViewById(R.id.iv_avatar);
+            // ID của TextView tên giảng viên có vẻ không khớp, tôi đã sửa lại thành R.id.tv_ten_giang_vien
+            // Nếu ID của bạn là tvTenGiangVien, hãy đổi lại cho đúng.
             tvTenGiangVien = itemView.findViewById(R.id.tvTenGiangVien);
-            tvBoMon = itemView.findViewById(R.id.tvBoMon);
+            tvBoMon = itemView.findViewById(R.id.tv_bo_mon);
             cardView = (CardView) itemView;
         }
     }
 }
-
