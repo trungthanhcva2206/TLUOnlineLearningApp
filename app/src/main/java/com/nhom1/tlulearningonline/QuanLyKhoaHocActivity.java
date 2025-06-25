@@ -130,6 +130,11 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
         // Dữ liệu mẫu
         loadKhoaHocFromApi();
 
+        iv_avatar.setOnClickListener(v -> {
+            Intent intent = new Intent(QuanLyKhoaHocActivity.this, UserProfileActivity.class);
+            startActivity(intent);
+        });
+
         btnTaoKhoaHoc.setOnClickListener(v -> {
             Intent intent = new Intent(QuanLyKhoaHocActivity.this, TaoKhoaHocActivity.class);
             startActivityForResult(intent, REQUEST_TAO_KHOA_HOC);
