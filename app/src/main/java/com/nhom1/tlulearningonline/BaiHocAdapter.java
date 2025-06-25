@@ -1,6 +1,5 @@
 package com.nhom1.tlulearningonline;
 
-
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -14,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 public class BaiHocAdapter extends RecyclerView.Adapter<BaiHocAdapter.BaiHocViewHolder> {
-    private List<Lesson> danhSachBaiHoc; // Thay đổi từ List<String> thành List<Lesson>
+    private List<Lesson> danhSachBaiHoc;
     private Context context;
 
     public BaiHocAdapter(List<Lesson> danhSachBaiHoc, Context context) {
@@ -34,16 +33,16 @@ public class BaiHocAdapter extends RecyclerView.Adapter<BaiHocAdapter.BaiHocView
     public void onBindViewHolder(@NonNull BaiHocViewHolder holder, int position) {
         Lesson baiHoc = danhSachBaiHoc.get(position);
         holder.tvTieuDeBaiHoc.setText(baiHoc.getTitle());
-        holder.tvThoiLuong.setText(baiHoc.getDuration());
+        holder.tvNoiDung.setText(baiHoc.getContent());
 
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, ChiTietBaiHocActivity.class);
+            intent.putExtra("id", baiHoc.getId());
             intent.putExtra("tieuDe", baiHoc.getTitle());
+            intent.putExtra("noiDung", baiHoc.getContent());
             context.startActivity(intent);
         });
     }
-
-
 
     @Override
     public int getItemCount() {
@@ -52,12 +51,12 @@ public class BaiHocAdapter extends RecyclerView.Adapter<BaiHocAdapter.BaiHocView
 
     public static class BaiHocViewHolder extends RecyclerView.ViewHolder {
         TextView tvTieuDeBaiHoc;
-        TextView tvThoiLuong;
+        TextView tvNoiDung;
 
         public BaiHocViewHolder(@NonNull View itemView) {
             super(itemView);
             tvTieuDeBaiHoc = itemView.findViewById(R.id.tv_lesson_title);
-            tvThoiLuong = itemView.findViewById(R.id.tv_lesson_duration);
+            tvNoiDung = itemView.findViewById(R.id.tv_lesson_duration); // Dùng lại view này để hiển thị nội dung
         }
     }
 }

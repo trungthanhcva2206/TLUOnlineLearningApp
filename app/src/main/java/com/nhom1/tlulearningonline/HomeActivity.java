@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
@@ -31,7 +32,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -132,6 +135,7 @@ public class HomeActivity extends AppCompatActivity {
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         setupDummyData();
+        fetchLessonsAndCourses();
         fetchUserInfo();
         setupSessionCheck();
 
@@ -226,14 +230,6 @@ public class HomeActivity extends AppCompatActivity {
         teacherList.clear();
 
         // Dữ liệu mẫu cho Khóa học nổi bật - Đã cập nhật để bao gồm soBaiHoc
-        featuredCoursesList.add(new CourseItem("Phát triển ứng dụng trên thiết bị di động", "Nguyễn Văn Nam", "Hệ thống thông tin", 80, false, 15));
-        featuredCoursesList.add(new CourseItem("Phân tích thiết kế hệ thống thông tin", "Trần Hùng Anh", "Hệ thống thông tin", 60, true, 12));
-        featuredCoursesList.add(new CourseItem("Cơ sở dữ liệu nâng cao", "Phạm Nhật Anh", "Công nghệ phần mềm", 95, false, 20));
-        featuredCoursesList.add(new CourseItem("Lập trình Web Frontend", "Lê Văn B", "Khoa học máy tính", 40, true, 18));
-        featuredCoursesList.add(new CourseItem("Trí tuệ nhân tạo cơ bản", "Đinh Thị C", "Công nghệ thông tin", 70, false, 10));
-
-        // Dữ liệu mẫu cho Khóa học đang học (chỉ một khóa học duy nhất) - Đã cập nhật để bao gồm soBaiHoc
-        inProgressCoursesList.add(new CourseItem("Tương tác người máy", "Nguyễn Thị Thu Hương", "Khoa CNTT", 10, true, 8));
 
 
         // Dữ liệu mẫu cho Giảng viên
@@ -242,4 +238,64 @@ public class HomeActivity extends AppCompatActivity {
         teacherList.add(new TeacherItem("Nguyễn Thị Thu Hương", R.drawable.gv_ng_thi_thu_huong));
         teacherList.add(new TeacherItem("Trương Xuân Nam", R.drawable.gv_truong_xuan_nam));
     }
+    private void fetchLessonsAndCourses() {
+        String lessonUrl = "http://14.225.207.221:6060/mobile/lessons";
+        String courseUrl = "http://14.225.207.221:6060/mobile/courses";
+        RequestQueue queue = Volley.newRequestQueue(this);
+
+        JsonArrayRequest lessonRequest = new JsonArrayRequest(Request.Method.GET, lessonUrl, null,
+                lessonResponse -> {
+                    Map<String, Integer> lessonCountMap = new HashMap<>();
+
+                    for (int i = 0; i < lessonResponse.length(); i++) {
+                        try {
+                            JSONObject lesson = lessonResponse.getJSONObject(i);
+                            String courseId = lesson.getString("courseId");
+                            lessonCountMap.put(courseId, lessonCountMap.getOrDefault(courseId, 0) + 1);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    JsonArrayRequest courseRequest = new JsonArrayRequest(Request.Method.GET, courseUrl, null,
+                            courseResponse -> {
+                                featuredCoursesList.clear();
+                                for (int i = 0; i < courseResponse.length(); i++) {
+                                    try {
+                                        JSONObject course = courseResponse.getJSONObject(i);
+                                        String id = course.getString("id");
+                                        String title = course.getString("title");
+                                        String teacherName = course.optString("teacherName", "Chưa rõ");
+                                        String departmentName = course.optString("departmentName", "Chưa rõ");
+                                        String des = course.optString("description", "Chưa rõ");
+
+                                        int soBaiHoc = lessonCountMap.getOrDefault(id, 0);
+
+                                        CourseItem item = new CourseItem(id, title, teacherName, departmentName,des, soBaiHoc);
+                                        featuredCoursesList.add(item);
+
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+
+                                featuredCoursesAdapter.notifyDataSetChanged();
+                            },
+                            error -> {
+                                Toast.makeText(this, "Lỗi lấy danh sách khoá học!", Toast.LENGTH_SHORT).show();
+                                error.printStackTrace();
+                            }
+                    );
+
+                    queue.add(courseRequest);
+                },
+                error -> {
+                    Toast.makeText(this, "Lỗi lấy danh sách bài học!", Toast.LENGTH_SHORT).show();
+                    error.printStackTrace();
+                }
+        );
+
+        queue.add(lessonRequest);
+    }
+
 }
