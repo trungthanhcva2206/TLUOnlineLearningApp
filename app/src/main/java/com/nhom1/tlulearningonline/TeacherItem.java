@@ -6,8 +6,7 @@ package com.nhom1.tlulearningonline;
  */
 public class TeacherItem {
     private String name;
-    private int avatarResId; // Drawable resource ID for the avatar image
-
+    private int avatarResId;
     /**
      * Constructs a new TeacherItem.
      *
@@ -19,18 +18,10 @@ public class TeacherItem {
         this.avatarResId = avatarResId;
     }
 
-    /**
-     * Returns the name of the teacher.
-     * @return The teacher's name.
-     */
     public String getName() {
         return name;
     }
 
-    /**
-     * Returns the resource ID of the teacher's avatar drawable.
-     * @return The drawable resource ID.
-     */
     public int getAvatarResId() {
         return avatarResId;
     }

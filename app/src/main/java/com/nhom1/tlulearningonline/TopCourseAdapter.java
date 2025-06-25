@@ -1,35 +1,35 @@
-package com.nhom1.tlulearningonline; // Đảm bảo khớp với package của bạn
+package com.nhom1.tlulearningonline;
 
-import android.content.Intent; // Import Intent
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast; // Dùng cho ví dụ click listener
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList; // Import ArrayList
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Adapter for displaying a list of featured courses in a RecyclerView.
+ * Adapter for displaying a list of normal courses (without progress bar) in a RecyclerView.
  * This adapter binds CourseItem data to the item_khoa_hoc_sv.xml layout.
  */
-public class FeaturedCoursesAdapter extends RecyclerView.Adapter<FeaturedCoursesAdapter.CourseViewHolder> {
+public class TopCourseAdapter extends RecyclerView.Adapter<TopCourseAdapter.CourseViewHolder> {
 
     private List<CourseItem> courseList;
 
     /**
-     * Constructor for the FeaturedCoursesAdapter.
+     * Constructor for the TopCourseAdapter.
      * @param courseList The list of CourseItem objects to display.
      */
-    public FeaturedCoursesAdapter(List<CourseItem> courseList) {
+    public TopCourseAdapter(List<CourseItem> courseList) {
         this.courseList = courseList;
     }
 
@@ -46,7 +46,7 @@ public class FeaturedCoursesAdapter extends RecyclerView.Adapter<FeaturedCourses
     @Override
     public CourseViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         // Inflate the item_khoa_hoc_sv.xml layout for each course item
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_khoa_hoc_sv_progress, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_khoa_hoc_sv, parent, false);
         return new CourseViewHolder(view);
     }
 
@@ -66,18 +66,16 @@ public class FeaturedCoursesAdapter extends RecyclerView.Adapter<FeaturedCourses
         holder.tvCourseName.setText(course.getTitle());
         holder.tvInstructor.setText("GV: " + course.getInstructor());
         holder.tvDepartment.setText("Bộ môn: " + course.getDepartment());
-        holder.progressBar.setProgress(course.getProgress());
-        holder.tvProgress.setText(course.getProgress() + "%");
+        holder.btnLessonCount.setText(course.getSoBaiHoc() + " bài học"); // Bind the lesson count button
 
         // Set the star icon based on the isStarred status
         if (course.isStarred()) {
-            holder.btnSave.setImageResource(R.drawable.ic_star_filled); // Make sure ic_star_filled drawable exists
+            holder.btnSave.setImageResource(R.drawable.ic_star_filled);
         } else {
-            holder.btnSave.setImageResource(R.drawable.ic_star_border); // Make sure ic_star_border drawable exists
+            holder.btnSave.setImageResource(R.drawable.ic_star_border);
         }
 
-        // Set alternating background colors for the CardView (consistent with your QuanLyKhoaHocActivity logic)
-        // Ensure blue_3 and blue are defined in colors.xml
+        // Set alternating background colors for the CardView
         int colorId = (position % 2 == 0) ? R.color.blue_3 : R.color.blue;
         holder.cardView.setCardBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), colorId));
 
@@ -132,9 +130,9 @@ public class FeaturedCoursesAdapter extends RecyclerView.Adapter<FeaturedCourses
      * Holds references to the views within each item_khoa_hoc_sv.xml layout.
      */
     public static class CourseViewHolder extends RecyclerView.ViewHolder {
-        CardView cardView; // Reference to the CardView for background color changes
-        TextView tvCourseName, tvInstructor, tvDepartment, tvProgress;
-        ProgressBar progressBar;
+        CardView cardView;
+        TextView tvCourseName, tvInstructor, tvDepartment;
+        Button btnLessonCount; // This is the button for lesson count
         ImageView btnSave;
 
         /**
@@ -143,12 +141,11 @@ public class FeaturedCoursesAdapter extends RecyclerView.Adapter<FeaturedCourses
          */
         public CourseViewHolder(@NonNull View itemView) {
             super(itemView);
-            cardView = (CardView) itemView; // Cast itemView to CardView to access its properties
+            cardView = (CardView) itemView;
             tvCourseName = itemView.findViewById(R.id.txt_ten_khoa_hoc);
             tvInstructor = itemView.findViewById(R.id.txt_giang_vien);
             tvDepartment = itemView.findViewById(R.id.txt_bo_mon);
-            progressBar = itemView.findViewById(R.id.progress_bar);
-            tvProgress = itemView.findViewById(R.id.txt_tien_do);
+            btnLessonCount = itemView.findViewById(R.id.btn_so_bai_hoc); // Find the lesson count button
             btnSave = itemView.findViewById(R.id.btn_save);
         }
     }
