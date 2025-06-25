@@ -99,29 +99,30 @@ public class LoginActivity extends AppCompatActivity {
                             String status = result.optString("status", "");
                             Log.d("LOGIN", "Authenticated: " + authenticated + ", Role: " + role);
 
-                            if (!"ACTIVE".equalsIgnoreCase(status)) {
-                                Toast.makeText(this, "Tài khoản của bạn đã bị vô hiệu hóa!", Toast.LENGTH_SHORT).show();
-                                return;
-                            }
                             if (authenticated) {
+                                if (!"ACTIVE".equalsIgnoreCase(status)) {
+                                    Toast.makeText(this, "Tài khoản của bạn đã bị vô hiệu hóa!", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+
                                 String userId = result.optString("id", "");
                                 String userRole = result.optString("role", "");
                                 SessionManager sessionManager = new SessionManager(this);
                                 sessionManager.saveLogin(userId, userRole);
                                 Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-                                Intent intent;
 
+                                Intent intent;
                                 if ("TEACHER".equalsIgnoreCase(role)) {
                                     intent = new Intent(this, HomeGVActivity.class);
                                 } else {
                                     intent = new Intent(this, HomeActivity.class);
                                 }
-
                                 startActivity(intent);
                                 finish();
                             } else {
                                 Toast.makeText(this, "Tên đăng nhập hoặc mật khẩu không đúng!", Toast.LENGTH_SHORT).show();
                             }
+
                         } else {
                             Toast.makeText(this, "Đăng nhập thất bại. Mã lỗi: " + code, Toast.LENGTH_SHORT).show();
                         }
