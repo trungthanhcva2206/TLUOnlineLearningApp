@@ -6,7 +6,7 @@ Repo này chứa mã nguồn cho Ứng dụng học trực tuyến TLULearning, 
 
 Ứng dụng TLULearning nhằm mục đích lấp đầy khoảng trống trong trải nghiệm học tập trên thiết bị di động cho sinh viên và giảng viên tại Trường Đại học Thủy Lợi, cung cấp một nền tảng chuyên biệt, thân thiện với người dùng và được tối ưu hóa cho thiết bị di động. Ứng dụng tập trung vào việc mang lại trải nghiệm học tập liền mạch và hiệu quả, tích hợp chặt chẽ với chương trình đào tạo của nhà trường
 
-# Nhóm sinh viên thực hiện dự án
+## Nhóm sinh viên thực hiện dự án
 
 - [Nguyen Thi Phuong Anh](https://github.com/ntpa812) - 2251161942 - 64HTTT.NB
 - [Tran Hung Anh](https://github.com/hunganh7204) - 2251061712 - 64CNTT.NB
@@ -84,7 +84,6 @@ Repo này chứa mã nguồn cho Ứng dụng học trực tuyến TLULearning, 
 
 ## Hướng phát triển trong tương lai
 
-Các kế hoạch phát triển trong tương lai cho ứng dụng TLULearning bao gồm:
 * **Tương tác nâng cao**: Triển khai các tính năng như bài kiểm tra, nộp bài tập
 * **Cải thiện trải nghiệm người dùng**: Tập trung vào cá nhân hóa và khả năng học ngoại tuyến
 * **Tích hợp công nghệ mới**: Khám phá gamification (trò chơi hóa) và AI để tạo ra một hệ sinh thái học tập kỹ thuật số toàn diện
