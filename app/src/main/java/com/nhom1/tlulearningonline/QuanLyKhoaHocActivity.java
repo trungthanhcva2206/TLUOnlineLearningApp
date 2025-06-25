@@ -322,8 +322,8 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
             if (dsBaiHoc == null) dsBaiHoc = new ArrayList<>();
             if (requestCode == REQUEST_TAO_KHOA_HOC) {
                 KhoaHoc khoaHocMoi = new KhoaHoc("0", ten, moTa, "GV. Nguyễn Văn A", dsBaiHoc);
-                danhSach.add(khoaHocMoi);
-                addKhoaHocToLayout(khoaHocMoi, danhSach.size() - 1);
+                danhSachDayDu.add(khoaHocMoi);
+                createKhoaHocView(khoaHocMoi, danhSachDayDu.size() - 1);
             } else if (requestCode == REQUEST_SUA_KHOA_HOC && data.getBooleanExtra("course_updated", false)) {
                 loadKhoaHocFromApi();
             }

@@ -170,18 +170,6 @@ public class HomeActivity extends AppCompatActivity {
         });
 
         fetchGiangVien();
-        edtSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // Bạn có thể triển khai logic lọc tìm kiếm ở đây.
-                // Hiện tại, chỉ là một Toast.
-                // Toast.makeText(HomeActivity.this, "Tìm kiếm: " + s.toString(), Toast.LENGTH_SHORT).show();
-            }
-            @Override
-            public void afterTextChanged(Editable s) {}
-        });
 
         ivSeeMoreLecturers.setOnClickListener(v -> {
             Intent intent = new Intent(HomeActivity.this, DanhSachGiangVienActivity.class);
@@ -322,6 +310,7 @@ public class HomeActivity extends AppCompatActivity {
                                                     item.setRegistered(registeredCourseIds.contains(id)); // <-- đánh dấu đã đăng ký
 
                                                     featuredCoursesList.add(item);
+                                                    featuredCoursesListFull.add(item);
                                                 } catch (JSONException e) {
                                                     e.printStackTrace();
                                                 }
