@@ -4,6 +4,9 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -11,6 +14,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,7 +23,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -31,8 +43,72 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
     private LinearLayout layoutDsKhoaHoc;
     private final ArrayList<KhoaHoc> danhSach = new ArrayList<>();
     private int viTriDangSua = -1;
+    TextView tv_ten_nguoi_dung;
+    ImageView iv_avatar;
 
     private BottomNavigationView bottomNavigationView; // Declared here
+
+    private Handler sessionHandler;
+    private Runnable sessionCheckRunnable;
+
+    private void fetchUserInfo() {
+        SessionManager sessionManager = new SessionManager(this);
+        String userId = sessionManager.getUserId();
+
+        if (userId == null || userId.isEmpty()) {
+            Toast.makeText(this, "Không tìm thấy userId!", Toast.LENGTH_SHORT).show();
+            sessionManager.clearSession();
+            Intent intent = new Intent(QuanLyKhoaHocActivity.this, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+            return;
+        }
+
+        String url = "http://14.225.207.221:6060/mobile/users/" + userId;
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+        Utf8StringRequest request = new Utf8StringRequest(Request.Method.GET, url,
+                response -> {
+                    try {
+                        JSONObject user = new JSONObject(response);
+                        String fullName = user.optString("fullname", "Người dùng");
+                        String avatarUrl = user.optString("avatar_url", "");
+
+                        tv_ten_nguoi_dung.setText(fullName + " 👋");
+
+                        if (avatarUrl != null && !avatarUrl.isEmpty()) {
+                            Log.d("AvatarURL", avatarUrl);
+                            Glide.with(this)
+                                    .load(avatarUrl)
+                                    .placeholder(R.drawable.ic_avatar)
+                                    .error(R.drawable.ic_avatar)
+                                    .circleCrop()
+                                    .into(iv_avatar);
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(this, "Lỗi xử lý JSON!", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                error -> {
+                    if (error.networkResponse != null && error.networkResponse.statusCode == 401) {
+                        sessionManager.clearSession();
+                        Toast.makeText(this, "Phiên đăng nhập đã hết hạn!", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(QuanLyKhoaHocActivity.this, LoginActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        error.printStackTrace();
+                        Toast.makeText(this, "Lỗi kết nối tới máy chủ!", Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+
+        queue.add(request);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,10 +116,15 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
         setContentView(R.layout.activity_quan_ly_khoa_hoc);
 
         // Initialize bottomNavigationView here
+        tv_ten_nguoi_dung = findViewById(R.id.tv_ten_nguoi_dung);
+        iv_avatar = findViewById(R.id.iv_avatar);
         bottomNavigationView = findViewById(R.id.bottom_navigation); // Add this line
 
         layoutDsKhoaHoc = findViewById(R.id.layout_ds_khoa_hoc);
         Button btnTaoKhoaHoc = findViewById(R.id.btn_tao_khoa_hoc);
+
+        fetchUserInfo();
+        setupSessionCheck();
 
         // Dữ liệu mẫu
         ArrayList<String> baiHocMau = new ArrayList<>();
@@ -168,6 +249,23 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
         });
 
         dialog.show();
+    }
+
+    private void setupSessionCheck() {
+        sessionHandler = new Handler(Looper.getMainLooper());
+        sessionCheckRunnable = () -> {
+            SessionManager sessionManager = new SessionManager(QuanLyKhoaHocActivity.this);
+            if (!sessionManager.isLoggedIn()) {
+                Toast.makeText(QuanLyKhoaHocActivity.this, "Phiên đăng nhập đã hết hạn!", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(QuanLyKhoaHocActivity.this, LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
+            } else {
+                sessionHandler.postDelayed(sessionCheckRunnable, 10000); // 10 giây kiểm tra lại
+            }
+        };
+        sessionHandler.postDelayed(sessionCheckRunnable, 10000); // bắt đầu sau 10 giây
     }
 
 

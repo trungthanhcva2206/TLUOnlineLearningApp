@@ -43,18 +43,12 @@ public class TaoKhoaHocActivity extends AppCompatActivity {
         edtMoTaKhoaHoc = findViewById(R.id.edt_mo_ta_khoa_hoc);
         layoutTenKhoaHoc = findViewById(R.id.layout_ten_khoa_hoc);
         layoutMoTaKhoaHoc = findViewById(R.id.layout_mo_ta_khoa_hoc);
-        btnThemBaiHoc = findViewById(R.id.btn_them_bai_hoc);
         btnTaoKhoaHoc = findViewById(R.id.btn_tao_khoa_hoc);
-        layoutDanhSachBaiHoc = findViewById(R.id.layout_danh_sach_bai_hoc);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         ImageView btnBack = findViewById(R.id.btn_back);
         btnBack.setOnClickListener(v -> finish());
 
-        btnThemBaiHoc.setOnClickListener(v -> {
-            Intent intent = new Intent(TaoKhoaHocActivity.this, ThemBaiHocActivity.class);
-            startActivityForResult(intent, REQUEST_THEM_BAI_HOC);
-        });
 
         btnTaoKhoaHoc.setOnClickListener(v -> {
             String tenKhoaHoc = edtTenKhoaHoc.getText().toString().trim();

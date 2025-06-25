@@ -2,8 +2,11 @@ package com.nhom1.tlulearningonline;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -19,8 +22,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import android.widget.ProgressBar; // Import ProgressBar
+import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -32,22 +44,90 @@ public class XemKhoaHocActivity extends AppCompatActivity {
 
     EditText edtTimKiem;
     TextView tvKhongTimThay;
+    TextView tv_ten_nguoi_dung;
+    ImageView iv_avatar;
     private ImageView ivAvatar;
 
     private BottomNavigationView bottomNavigationView;
+    private Handler sessionHandler;
+    private Runnable sessionCheckRunnable;
 
+
+    private void fetchUserInfo() {
+        SessionManager sessionManager = new SessionManager(this);
+        String userId = sessionManager.getUserId();
+
+        if (userId == null || userId.isEmpty()) {
+            Toast.makeText(this, "Không tìm thấy userId!", Toast.LENGTH_SHORT).show();
+            sessionManager.clearSession();
+            Intent intent = new Intent(XemKhoaHocActivity.this, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+            return;
+        }
+
+        String url = "http://14.225.207.221:6060/mobile/users/" + userId;
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+        Utf8StringRequest request = new Utf8StringRequest(Request.Method.GET, url,
+                response -> {
+                    try {
+                        JSONObject user = new JSONObject(response);
+                        String fullName = user.optString("fullname", "Người dùng");
+                        String avatarUrl = user.optString("avatar_url", "");
+
+                        tv_ten_nguoi_dung.setText(fullName + " 👋");
+
+                        if (avatarUrl != null && !avatarUrl.isEmpty()) {
+                            Log.d("AvatarURL", avatarUrl);
+                            Glide.with(this)
+                                    .load(avatarUrl)
+                                    .placeholder(R.drawable.ic_avatar)
+                                    .error(R.drawable.ic_avatar)
+                                    .circleCrop()
+                                    .into(iv_avatar);
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(this, "Lỗi xử lý JSON!", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                error -> {
+                    if (error.networkResponse != null && error.networkResponse.statusCode == 401) {
+                        sessionManager.clearSession();
+                        Toast.makeText(this, "Phiên đăng nhập đã hết hạn!", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(XemKhoaHocActivity.this, LoginActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        error.printStackTrace();
+                        Toast.makeText(this, "Lỗi kết nối tới máy chủ!", Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+
+        queue.add(request);
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_xem_khoa_hoc);
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
+        tv_ten_nguoi_dung = findViewById(R.id.tv_ten_nguoi_dung);
+        iv_avatar = findViewById(R.id.iv_avatar);
 
         layoutThamGia = findViewById(R.id.layout_khoa_hoc_tham_gia);
         layoutDaLuu = findViewById(R.id.layout_khoa_hoc_da_luu);
         edtTimKiem = findViewById(R.id.edt_tim_kiem);
         tvKhongTimThay = findViewById(R.id.tv_khong_tim_thay);
         ivAvatar = findViewById(R.id.iv_avatar);
+
+        fetchUserInfo();
+        setupSessionCheck();
 
         khoaHocThamGia.add(new KhoaHoc("Tương tác người máy", "GV: Nguyễn Thị Thu Hương", "Bộ môn Công nghệ phần mềm", 80, 15));
         khoaHocThamGia.add(new KhoaHoc("Công nghệ Web", "GV: Nguyễn Tu Trung", "Bộ môn Hệ thống thông tin", 25, 10));
@@ -219,6 +299,22 @@ public class XemKhoaHocActivity extends AppCompatActivity {
         return wrapper;
     }
 
+    private void setupSessionCheck() {
+        sessionHandler = new Handler(Looper.getMainLooper());
+        sessionCheckRunnable = () -> {
+            SessionManager sessionManager = new SessionManager(XemKhoaHocActivity.this);
+            if (!sessionManager.isLoggedIn()) {
+                Toast.makeText(XemKhoaHocActivity.this, "Phiên đăng nhập đã hết hạn!", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(XemKhoaHocActivity.this, LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
+            } else {
+                sessionHandler.postDelayed(sessionCheckRunnable, 10000); // 10 giây kiểm tra lại
+            }
+        };
+        sessionHandler.postDelayed(sessionCheckRunnable, 10000); // bắt đầu sau 10 giây
+    }
     public static class KhoaHoc {
         String ten, giangVien, boMon;
         int tienDo;

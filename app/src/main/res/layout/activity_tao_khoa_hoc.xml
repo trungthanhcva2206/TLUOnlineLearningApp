@@ -112,41 +112,6 @@
                     android:padding="12dp" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Danh sách bài học -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Danh sách bài học"
-                android:layout_marginTop="24dp"
-                android:textStyle="bold"
-                android:textSize="16dp" />
-
-            <!-- Vùng hiển thị giống EditText để chứa danh sách bài học -->
-            <LinearLayout
-                android:id="@+id/layout_danh_sach_bai_hoc"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@drawable/bg_edit_text"
-                android:padding="12dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="12dp"
-                android:minHeight="100dp" />
-
-            <!-- Nút thêm bài học -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_them_bai_hoc"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="+ Thêm bài học"
-                android:textStyle="bold"
-                android:textSize="16dp"
-                android:textColor="@color/blue"
-                android:layout_marginBottom="24dp"
-                app:cornerRadius="8dp"
-                app:strokeWidth="2dp"
-                app:strokeColor="@color/blue"
-                android:backgroundTint="@android:color/white" />
 
             <!-- Nút tạo khóa học -->
             <Button
