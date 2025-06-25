@@ -69,7 +69,7 @@ public class UserProfileActivity extends AppCompatActivity {
 
         // Xử lý sự kiện cho nút Đăng xuất
         btnLogout.setOnClickListener(v -> {
-            sessionManager.clearSession();
+//            sessionManager.clearSession();
             // Hiển thị Toast thông báo
             Toast.makeText(UserProfileActivity.this, "Đăng xuất thành công!", Toast.LENGTH_SHORT).show();
 

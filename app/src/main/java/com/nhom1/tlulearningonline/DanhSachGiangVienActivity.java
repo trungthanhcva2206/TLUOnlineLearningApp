@@ -3,15 +3,28 @@ package com.nhom1.tlulearningonline;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +38,106 @@ public class DanhSachGiangVienActivity extends AppCompatActivity {
     private ImageView ivAvatar;
 
     private BottomNavigationView bottomNavigationView;
+    private Handler sessionHandler;
+    private Runnable sessionCheckRunnable;
+
+    private void fetchUserInfo() {
+        SessionManager sessionManager = new SessionManager(this);
+        String userId = sessionManager.getUserId();
+
+        if (userId == null || userId.isEmpty()) {
+            Toast.makeText(this, "Không tìm thấy userId!", Toast.LENGTH_SHORT).show();
+            sessionManager.clearSession();
+            Intent intent = new Intent(DanhSachGiangVienActivity.this, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+            return;
+        }
+
+        String url = "http://14.225.207.221:6060/mobile/users/" + userId;
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+        StringRequest request = new StringRequest(Request.Method.GET, url,
+                response -> {
+                    try {
+                        JSONObject user = new JSONObject(response);
+                        String avatarUrl = user.optString("avatar_url", "");
+
+
+                        if (avatarUrl != null && !avatarUrl.isEmpty()) {
+                            Log.d("AvatarURL", avatarUrl);
+                            Glide.with(this)
+                                    .load(avatarUrl)
+                                    .placeholder(R.drawable.ic_avatar)
+                                    .error(R.drawable.ic_avatar)
+                                    .circleCrop()
+                                    .into(ivAvatar);
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(this, "Lỗi xử lý JSON!", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                error -> {
+                    if (error.networkResponse != null && error.networkResponse.statusCode == 401) {
+                        sessionManager.clearSession();
+                        Toast.makeText(this, "Phiên đăng nhập đã hết hạn!", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(DanhSachGiangVienActivity.this, LoginActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        error.printStackTrace();
+                        Toast.makeText(this, "Lỗi kết nối tới máy chủ!", Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+
+        queue.add(request);
+    }
+
+    private void fetchDanhSachGiangVien() {
+        String url = "http://14.225.207.221:6060/mobile/users/role?role=TEACHER";
+
+        Utf8StringRequest request = new Utf8StringRequest(Request.Method.GET, url,
+                response -> {
+                    try {
+                        JSONArray jsonArray = new JSONArray(response);
+                        danhSachGiangVien.clear();
+
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            JSONObject obj = jsonArray.getJSONObject(i);
+                            GiangVien gv = new GiangVien(
+                                    obj.optString("id"),
+                                    obj.optString("username"),
+                                    obj.optString("password"),
+                                    obj.optString("role"),
+                                    obj.optString("avatar_url"),
+                                    obj.optString("fullname"),
+                                    obj.optString("status"),
+                                    obj.optString("createdAt"),
+                                    obj.optString("updatedAt")
+                            );
+                            danhSachGiangVien.add(gv);
+                        }
+
+                        adapter.notifyDataSetChanged();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(this, "Lỗi xử lý dữ liệu giảng viên", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                error -> {
+                    error.printStackTrace();
+                    Toast.makeText(this, "Không thể kết nối máy chủ", Toast.LENGTH_SHORT).show();
+                });
+
+
+        VolleySingleton.getInstance(this).addToRequestQueue(request);
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,23 +153,21 @@ public class DanhSachGiangVienActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.recyclerGiangVien);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        fetchUserInfo();
+        setupSessionCheck();
         danhSachGiangVien = new ArrayList<>();
 
-        danhSachGiangVien.add(new GiangVien("Nguyễn Văn Nam", "Hệ thống thông tin", R.drawable.gv_ng_van_nam_portrait));
-        danhSachGiangVien.add(new GiangVien("Nguyễn Tu Trung", "Hệ thống thông tin", R.drawable.gv_ng_tu_trung_portrait));
-        danhSachGiangVien.add(new GiangVien("Nguyễn Thị Thu Hương", "Công nghệ phần mềm", R.drawable.gv_ng_thi_thu_huong));
-        danhSachGiangVien.add(new GiangVien("Trương Xuân Nam", "Mạng máy tính", R.drawable.gv_truong_xuan_nam));
 
         adapter = new GiangVienAdapter(danhSachGiangVien, giangVien -> {
             Intent intent = new Intent(this, ChiTietGiangVienActivity.class);
-            intent.putExtra("ten", giangVien.getTen());
-            intent.putExtra("boMon", giangVien.getBoMon());
-            intent.putExtra("avatarResId", giangVien.getAvatarResId());
+            intent.putExtra("ten", giangVien.getFullname());
+            intent.putExtra("avatarResId", giangVien.getAvatarUrl());
             startActivity(intent);
         });
 
 
         recyclerView.setAdapter(adapter);
+        fetchDanhSachGiangVien();
 
         ivAvatar.setOnClickListener(v -> {
             Intent intent = new Intent(DanhSachGiangVienActivity.this, UserProfileActivity.class);
@@ -96,5 +207,22 @@ public class DanhSachGiangVienActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void setupSessionCheck() {
+        sessionHandler = new Handler(Looper.getMainLooper());
+        sessionCheckRunnable = () -> {
+            SessionManager sessionManager = new SessionManager(DanhSachGiangVienActivity.this);
+            if (!sessionManager.isLoggedIn()) {
+                Toast.makeText(DanhSachGiangVienActivity.this, "Phiên đăng nhập đã hết hạn!", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(DanhSachGiangVienActivity.this, LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
+            } else {
+                sessionHandler.postDelayed(sessionCheckRunnable, 10000); // 10 giây kiểm tra lại
+            }
+        };
+        sessionHandler.postDelayed(sessionCheckRunnable, 10000); // bắt đầu sau 10 giây
     }
 }

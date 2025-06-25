@@ -43,12 +43,11 @@ public class GiangVienAdapter extends RecyclerView.Adapter<GiangVienAdapter.Gian
     @Override
     public void onBindViewHolder(@NonNull GiangVienViewHolder holder, int position) {
         GiangVien giangVien = danhSachGiangVien.get(position);
-        holder.tvTenGiangVien.setText(giangVien.getTen());
-        holder.tvBoMon.setText("Bộ môn: "+giangVien.getBoMon());
+        holder.tvTenGiangVien.setText(giangVien.getFullname());
 //        holder.ivAvatar.setImageResource(giangVien.getAvatarResId());
 
         Glide.with(holder.ivAvatar.getContext())
-                .load(giangVien.getAvatarResId())
+                .load(giangVien.getAvatarUrl())
                 .placeholder(R.drawable.ic_avatar)
                 .error(R.drawable.ic_avatar)
                 .circleCrop()
