@@ -34,6 +34,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class QuanLyKhoaHocActivity extends AppCompatActivity {
 
@@ -127,17 +128,7 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
         setupSessionCheck();
 
         // Dữ liệu mẫu
-        ArrayList<String> baiHocMau = new ArrayList<>();
-        baiHocMau.add("Bài 1: Giới thiệu");
-        baiHocMau.add("Bài 2: Thiết kế giao diện");
-        baiHocMau.add("Bài 3: Nguyên tắc HCI");
-
-        danhSach.add(new KhoaHoc("Tương tác người máy", "Môn học về nguyên tắc thiết kế giao diện", new ArrayList<>(baiHocMau)));
-        danhSach.add(new KhoaHoc("Trí tuệ nhân tạo", "Giới thiệu về AI và ứng dụng", new ArrayList<>(baiHocMau)));
-
-        for (int i = 0; i < danhSach.size(); i++) {
-            addKhoaHocToLayout(danhSach.get(i), i);
-        }
+        loadKhoaHocFromApi();
 
         btnTaoKhoaHoc.setOnClickListener(v -> {
             Intent intent = new Intent(QuanLyKhoaHocActivity.this, TaoKhoaHocActivity.class);
@@ -185,13 +176,11 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
         btnView.setOnClickListener(v -> showConfirmationDialog(itemView, btnView, btnEdit));
 
         btnEdit.setOnClickListener(v -> {
-            viTriDangSua = position;
             Intent intent = new Intent(QuanLyKhoaHocActivity.this, SuaKhoaHocActivity.class);
-            intent.putExtra("ten", kh.ten);
-            intent.putExtra("mo_ta", kh.moTa);
-            intent.putStringArrayListExtra("ds_bai_hoc", kh.dsBaiHoc);
-            startActivityForResult(intent, REQUEST_SUA_KHOA_HOC);
+            intent.putExtra("course_id", kh.id); // truyền id
+            startActivity(intent);
         });
+
 
         itemView.setOnClickListener(v -> {
             Intent intent = new Intent(QuanLyKhoaHocActivity.this, ChiTietKhoaHocActivity.class);
@@ -278,7 +267,7 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
             ArrayList<String> dsBaiHoc = data.getStringArrayListExtra("ds_bai_hoc");
             if (dsBaiHoc == null) dsBaiHoc = new ArrayList<>();
             if (requestCode == REQUEST_TAO_KHOA_HOC) {
-                KhoaHoc khoaHocMoi = new KhoaHoc(ten, moTa, dsBaiHoc);
+                KhoaHoc khoaHocMoi = new KhoaHoc("0", ten, moTa, "GV. Nguyễn Văn A", dsBaiHoc);
                 danhSach.add(khoaHocMoi);
                 addKhoaHocToLayout(khoaHocMoi, danhSach.size() - 1);
             } else if (requestCode == REQUEST_SUA_KHOA_HOC && viTriDangSua != -1) {
@@ -295,15 +284,90 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
         }
     }
     public static class KhoaHoc {
-        String ten, moTa;
+        String id;
+        String ten, moTa, tenGV;
         ArrayList<String> dsBaiHoc;
-        public KhoaHoc(String ten, String moTa, ArrayList<String> dsBaiHoc) {
+
+        public KhoaHoc(String id, String ten, String moTa, String tenGV, ArrayList<String> dsBaiHoc) {
+            this.id = id;
             this.ten = ten;
             this.moTa = moTa;
+            this.tenGV = tenGV;
             this.dsBaiHoc = dsBaiHoc != null ? dsBaiHoc : new ArrayList<>();
         }
-        public int getSoBaiHoc() { return dsBaiHoc.size(); }
+
+        public int getSoBaiHoc() {
+            return dsBaiHoc.size();
+        }
     }
+
+    private void loadKhoaHocFromApi() {
+        String urlCourses = "http://14.225.207.221:6060/mobile/courses";
+        String urlLessons = "http://14.225.207.221:6060/mobile/lessons";
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+
+        // B1: Lấy toàn bộ lessons trước
+        StringRequest lessonRequest = new StringRequest(Request.Method.GET, urlLessons,
+                response -> {
+                    try {
+                        // B1.1: Đếm số bài học theo courseId
+                        HashMap<String, ArrayList<String>> lessonsMap = new HashMap<>();
+                        org.json.JSONArray lessonsArray = new org.json.JSONArray(response);
+                        for (int i = 0; i < lessonsArray.length(); i++) {
+                            JSONObject lesson = lessonsArray.getJSONObject(i);
+                            String courseId = lesson.getString("courseId");
+                            String lessonTitle = lesson.getString("title");
+                            if (!lessonsMap.containsKey(courseId)) {
+                                lessonsMap.put(courseId, new ArrayList<>());
+                            }
+                            lessonsMap.get(courseId).add(lessonTitle);
+                        }
+
+                        // B2: Gọi API khóa học
+                        StringRequest courseRequest = new StringRequest(Request.Method.GET, urlCourses,
+                                courseResponse -> {
+                                    try {
+                                        danhSach.clear();
+                                        layoutDsKhoaHoc.removeAllViews();
+
+                                        org.json.JSONArray courseArray = new org.json.JSONArray(courseResponse);
+                                        for (int i = 0; i < courseArray.length(); i++) {
+                                            JSONObject obj = courseArray.getJSONObject(i);
+                                            String id = obj.getString("id");
+                                            String title = obj.getString("title");
+                                            String description = obj.getString("description");
+                                            String teacher = obj.getString("teacherName");
+
+                                            ArrayList<String> lessons = lessonsMap.getOrDefault(id, new ArrayList<>());
+
+                                            KhoaHoc kh = new KhoaHoc(id, title, description, teacher, lessons);
+                                            danhSach.add(kh);
+                                            addKhoaHocToLayout(kh, danhSach.size() - 1);
+                                        }
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                        Toast.makeText(this, "Lỗi xử lý course JSON", Toast.LENGTH_SHORT).show();
+                                    }
+                                },
+                                error -> {
+                                    error.printStackTrace();
+                                    Toast.makeText(this, "Lỗi tải danh sách khóa học!", Toast.LENGTH_SHORT).show();
+                                }
+                        );
+                        queue.add(courseRequest);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                },
+                error -> {
+                    error.printStackTrace();
+                    Toast.makeText(this, "Lỗi tải danh sách bài học!", Toast.LENGTH_SHORT).show();
+                }
+        );
+        queue.add(lessonRequest);
+    }
+
     static class CustomViewBinder {
         public static void bind(View itemView, KhoaHoc kh) {
             TextView tvTieuDe = itemView.findViewById(R.id.tv_tieu_de);
