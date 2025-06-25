@@ -12,7 +12,7 @@ Repo này chứa mã nguồn cho Ứng dụng học trực tuyến TLULearning, 
 - [Tran Hung Anh](https://github.com/hunganh7204) - 2251061712 - 64CNTT.NB
 - [Nguyen Le Trung Thanh](https://github.com/trungthanhcva2206) - 2251061885 - 64CNTT.NB
 
-## NOTE
+### NOTE
 
 - [Tài liệu báo cáo](https://docs.google.com/document/d/1a4ASaS-tqENg4HVe3Yz0cIjeiJf_au0h/edit?usp=sharing&ouid=103250931260588488904&rtpof=true&sd=true)
 - [Thiết kế giao diện](https://www.figma.com/design/x5MHCLc5jwGazjYQ0upEeW/TLULearning---mobile?m=auto&t=5z1FBiagNUEK4qwh-1)
