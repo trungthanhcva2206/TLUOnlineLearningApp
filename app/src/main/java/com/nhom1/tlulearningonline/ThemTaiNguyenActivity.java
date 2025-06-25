@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,10 +20,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.android.volley.Request;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ThemTaiNguyenActivity extends AppCompatActivity {
 
@@ -35,6 +42,7 @@ public class ThemTaiNguyenActivity extends AppCompatActivity {
 
     private final List<Uri> danhSachVideo = new ArrayList<>();
     private final List<Uri> danhSachTaiLieu = new ArrayList<>();
+    private String lessonId;
 
     private String tenBaiHoc;
     private String moTaBaiHoc;
@@ -43,6 +51,8 @@ public class ThemTaiNguyenActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_them_tai_nguyen);
+
+        lessonId = getIntent().getStringExtra("lesson_id");
 
         // Nhận dữ liệu từ ThemBaiHocActivity
         Intent intent = getIntent();
@@ -76,15 +86,18 @@ public class ThemTaiNguyenActivity extends AppCompatActivity {
 
         // Sự kiện nút "Thêm bài học" (nút cuối cùng)
         btnThemBaiHoc.setOnClickListener(v -> {
-            if (danhSachVideo.isEmpty()) {
-                Toast.makeText(this, "Vui lòng thêm ít nhất 1 video", Toast.LENGTH_SHORT).show();
-                return;
+
+            // Upload tất cả video
+            for (Uri videoUri : danhSachVideo) {
+                uploadFile(videoUri, "http://14.225.207.221:6060/mobile/videos/upload", "video");
             }
 
-            // TODO: Tại đây, bạn sẽ thực hiện logic lưu trữ cuối cùng
-            // ví dụ: tải video/tài liệu lên server, lưu thông tin bài học vào database.
-            // Dưới đây là ví dụ hiển thị thông tin bằng Toast và trả về kết quả.
+            // Upload tất cả tài liệu PDF (nếu có)
+            for (Uri pdfUri : danhSachTaiLieu) {
+                uploadFile(pdfUri, "http://14.225.207.221:6060/mobile/documents/upload", "pdf");
+            }
 
+            // Hiển thị thông tin ra Toast
             StringBuilder tenTaiLieuBuilder = new StringBuilder();
             for (Uri uri : danhSachTaiLieu) {
                 String fileName = getFileName(uri);
@@ -93,20 +106,15 @@ public class ThemTaiNguyenActivity extends AppCompatActivity {
                 }
             }
 
-            String message = "Đã sẵn sàng để thêm bài học:\n" +
+            String message = "Đang tải lên bài học:\n" +
                     "Tên: " + tenBaiHoc + "\n" +
                     "Mô tả: " + moTaBaiHoc + "\n" +
                     "Số video: " + danhSachVideo.size() + "\n" +
-                    "Tài liệu: \n" + tenTaiLieuBuilder.toString();
+                    "Tài liệu: \n" + tenTaiLieuBuilder;
 
             Toast.makeText(this, message, Toast.LENGTH_LONG).show();
 
-
-            // Nếu bạn cần trả kết quả về màn hình tạo khóa học (trước cả màn thêm bài học)
-            // thì bạn cần dùng startActivityForResult từ màn đó để gọi ThemBaiHocActivity.
-            // Sau đó, khi logic ở đây hoàn tất, bạn có thể đặt kết quả và kết thúc cả 2 activity.
-
-            // Ví dụ: tạo intent kết quả
+            // (Tuỳ chọn) Trả kết quả về activity trước đó
             Intent resultIntent = new Intent();
             resultIntent.putExtra("tenBaiHoc", tenBaiHoc);
             resultIntent.putExtra("moTaBaiHoc", moTaBaiHoc);
@@ -114,9 +122,10 @@ public class ThemTaiNguyenActivity extends AppCompatActivity {
             resultIntent.putParcelableArrayListExtra("danhSachTaiLieu", (ArrayList<Uri>) danhSachTaiLieu);
             setResult(Activity.RESULT_OK, resultIntent);
 
-            // Kết thúc activity hiện tại để quay về màn hình trước đó.
+            // Kết thúc activity
             finish();
         });
+
 
         // Xử lý Bottom Navigation View
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
@@ -197,4 +206,95 @@ public class ThemTaiNguyenActivity extends AppCompatActivity {
         }
         return result != null ? result : "";
     }
+    private byte[] readFileBytes(Uri uri) {
+        try (InputStream inputStream = getContentResolver().openInputStream(uri);
+             ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+
+            int nRead;
+            byte[] data = new byte[4096];
+            while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, nRead);
+            }
+            return buffer.toByteArray();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    private void uploadFile(Uri fileUri, String url, String fileType) {
+        String fileName = getFileName(fileUri);
+        byte[] fileBytes = readFileBytes(fileUri);
+
+        if (fileBytes == null) {
+            Toast.makeText(this, "Không đọc được file " + fileName, Toast.LENGTH_SHORT).show();
+            Log.e("UPLOAD_FAIL", "File bytes null for " + fileName);
+            return;
+        }
+
+        // Log kích thước file
+        Log.d("UPLOAD_INFO", "Uploading: " + fileName + " (" + fileBytes.length / 1024 + " KB)");
+        Toast.makeText(this, "Đang tải lên: " + fileName, Toast.LENGTH_SHORT).show();
+
+        // Lấy kiểu MIME từ hệ thống (nếu có)
+        String mediaType = getContentResolver().getType(fileUri);
+        if (mediaType == null) {
+            mediaType = fileType.equals("video") ? "video/mp4" : "application/pdf";
+        }
+
+        // Key cho file upload (backend yêu cầu là 'file' cho tài liệu)
+        String fileKey = fileType.equals("video") ? "video" : "file";
+
+        // Tạo Multipart request
+        okhttp3.RequestBody requestBody = new okhttp3.MultipartBody.Builder()
+                .setType(okhttp3.MultipartBody.FORM)
+                .addFormDataPart("title", tenBaiHoc)
+                .addFormDataPart("lessonId", lessonId)
+                .addFormDataPart(fileKey, fileName,
+                        okhttp3.RequestBody.create(fileBytes, okhttp3.MediaType.parse(mediaType)))
+                .build();
+
+        // OkHttp client với timeout dài hơn
+        okhttp3.OkHttpClient client = new okhttp3.OkHttpClient.Builder()
+                .connectTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
+                .writeTimeout(300, java.util.concurrent.TimeUnit.SECONDS)
+                .readTimeout(300, java.util.concurrent.TimeUnit.SECONDS)
+                .build();
+
+        // Tạo request
+        okhttp3.Request request = new okhttp3.Request.Builder()
+                .url(url)  // VD: http://14.225.207.221:6060/mobile/documents/upload
+                .post(requestBody)
+                .build();
+
+        // Gửi request bất đồng bộ
+        client.newCall(request).enqueue(new okhttp3.Callback() {
+            @Override
+            public void onFailure(@NonNull okhttp3.Call call, @NonNull IOException e) {
+                runOnUiThread(() -> {
+                    Toast.makeText(ThemTaiNguyenActivity.this, "Lỗi tải lên: " + fileName, Toast.LENGTH_SHORT).show();
+                    Log.e("UPLOAD_FAIL", "File: " + fileName + " | Error: " + e.getMessage(), e);
+                });
+            }
+
+            @Override
+            public void onResponse(@NonNull okhttp3.Call call, @NonNull okhttp3.Response response) throws IOException {
+                String resBody = response.body() != null ? response.body().string() : "No Response Body";
+
+                runOnUiThread(() -> {
+                    if (response.isSuccessful()) {
+                        Toast.makeText(ThemTaiNguyenActivity.this, "Tải lên thành công: " + fileName, Toast.LENGTH_SHORT).show();
+                        Log.d("UPLOAD_SUCCESS", "File: " + fileName + " | Response: " + resBody);
+                    } else {
+                        Toast.makeText(ThemTaiNguyenActivity.this, "Tải lên thất bại: " + fileName, Toast.LENGTH_SHORT).show();
+                        Log.e("UPLOAD_ERROR", "Code: " + response.code() + " | File: " + fileName + " | Response: " + resBody);
+                    }
+                });
+            }
+        });
+    }
+
+
+
+
 }

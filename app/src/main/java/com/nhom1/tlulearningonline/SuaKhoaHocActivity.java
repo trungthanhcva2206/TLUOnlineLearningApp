@@ -33,6 +33,7 @@ public class SuaKhoaHocActivity extends AppCompatActivity {
     private Button btnThemBaiHoc, btnCapNhatKhoaHoc;
     private LinearLayout layoutDanhSachBaiHoc;
     private  BottomNavigationView bottomNavigationView;
+    private String courseId;
 
     private final List<BaiHoc> danhSachBaiHoc = new ArrayList<>();
     private static final int REQUEST_THEM_BAI_HOC = 1;
@@ -42,7 +43,7 @@ public class SuaKhoaHocActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sua_khoa_hoc);
-        String courseId = getIntent().getStringExtra("course_id");
+        courseId = getIntent().getStringExtra("course_id");
         if (courseId != null) {
             Log.d("SuaKhoaHoc", "Course ID: " + courseId);
             fetchCourseDetail(courseId); // ⬅ Gọi API ở bước 2
@@ -79,9 +80,16 @@ public class SuaKhoaHocActivity extends AppCompatActivity {
         }
 
         btnThemBaiHoc.setOnClickListener(v -> {
+            if (courseId == null || courseId.isEmpty()) {
+                Toast.makeText(this, "Không tìm thấy khóa học", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             Intent i = new Intent(SuaKhoaHocActivity.this, ThemBaiHocActivity.class);
+            i.putExtra("course_id", courseId);
             startActivityForResult(i, REQUEST_THEM_BAI_HOC);
         });
+
 
         btnCapNhatKhoaHoc.setOnClickListener(v -> {
             String tenKhoaHoc = edtTenKhoaHoc.getText().toString().trim();

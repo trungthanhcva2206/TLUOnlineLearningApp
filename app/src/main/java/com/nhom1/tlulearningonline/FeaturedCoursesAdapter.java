@@ -66,15 +66,15 @@ public class FeaturedCoursesAdapter extends RecyclerView.Adapter<FeaturedCourses
         holder.tvCourseName.setText(course.getTitle());
         holder.tvInstructor.setText("GV: " + course.getInstructor());
         holder.tvDepartment.setText("Bộ môn: " + course.getDepartment());
-        holder.progressBar.setProgress(course.getProgress());
-        holder.tvProgress.setText(course.getProgress() + "%");
+//        holder.progressBar.setProgress(course.getProgress());
+//        holder.tvProgress.setText(course.getProgress() + "%");
 
         // Set the star icon based on the isStarred status
-        if (course.isStarred()) {
-            holder.btnSave.setImageResource(R.drawable.ic_star_filled); // Make sure ic_star_filled drawable exists
-        } else {
-            holder.btnSave.setImageResource(R.drawable.ic_star_border); // Make sure ic_star_border drawable exists
-        }
+//        if (course.isStarred()) {
+//            holder.btnSave.setImageResource(R.drawable.ic_star_filled); // Make sure ic_star_filled drawable exists
+//        } else {
+//            holder.btnSave.setImageResource(R.drawable.ic_star_border); // Make sure ic_star_border drawable exists
+//        }
 
         // Set alternating background colors for the CardView (consistent with your QuanLyKhoaHocActivity logic)
         // Ensure blue_3 and blue are defined in colors.xml
@@ -106,14 +106,14 @@ public class FeaturedCoursesAdapter extends RecyclerView.Adapter<FeaturedCourses
         // Click listener for the star/save button
         holder.btnSave.setOnClickListener(v -> {
             // Toggle the starred status and update the icon
-            course.setStarred(!course.isStarred());
-            if (course.isStarred()) {
-                holder.btnSave.setImageResource(R.drawable.ic_star_filled);
-                Toast.makeText(v.getContext(), "Đã lưu khóa học: " + course.getTitle(), Toast.LENGTH_SHORT).show();
-            } else {
-                holder.btnSave.setImageResource(R.drawable.ic_star_border);
-                Toast.makeText(v.getContext(), "Đã bỏ lưu khóa học: " + course.getTitle(), Toast.LENGTH_SHORT).show();
-            }
+//            course.setStarred(!course.isStarred());
+//            if (course.isStarred()) {
+//                holder.btnSave.setImageResource(R.drawable.ic_star_filled);
+//                Toast.makeText(v.getContext(), "Đã lưu khóa học: " + course.getTitle(), Toast.LENGTH_SHORT).show();
+//            } else {
+//                holder.btnSave.setImageResource(R.drawable.ic_star_border);
+//                Toast.makeText(v.getContext(), "Đã bỏ lưu khóa học: " + course.getTitle(), Toast.LENGTH_SHORT).show();
+//            }
             // TODO: Persist this change (e.g., update in database or shared preferences)
         });
     }
