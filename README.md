@@ -4,13 +4,13 @@ Repo này chứa mã nguồn cho Ứng dụng học trực tuyến TLULearning, 
 
 ## Tổng quan
 
-Ứng dụng TLULearning nhằm mục đích lấp đầy khoảng trống trong trải nghiệm học tập trên thiết bị di động cho sinh viên và giảng viên tại Trường Đại học Thủy Lợi, cung cấp một nền tảng chuyên biệt, thân thiện với người dùng và được tối ưu hóa cho thiết bị di động. [cite_start]Ứng dụng tập trung vào việc mang lại trải nghiệm học tập liền mạch và hiệu quả, tích hợp chặt chẽ với chương trình đào tạo của nhà trường
+Ứng dụng TLULearning nhằm mục đích lấp đầy khoảng trống trong trải nghiệm học tập trên thiết bị di động cho sinh viên và giảng viên tại Trường Đại học Thủy Lợi, cung cấp một nền tảng chuyên biệt, thân thiện với người dùng và được tối ưu hóa cho thiết bị di động. Ứng dụng tập trung vào việc mang lại trải nghiệm học tập liền mạch và hiệu quả, tích hợp chặt chẽ với chương trình đào tạo của nhà trường
 
 # Nhóm sinh viên thực hiện dự án
 
-- [Nguyen Le Trung Thanh](https://github.com/trungthanhcva2206)
-- [Nguyen Thi Phuong Anh](https://github.com/ntpa812)
-- [Tran Hung Anh](https://github.com/hunganh7204)
+- [Nguyen Thi Phuong Anh](https://github.com/ntpa812) - 2251161942 - 64HTTT.NB
+- [Tran Hung Anh](https://github.com/hunganh7204) - 2251061712 - 64CNTT.NB
+- [Nguyen Le Trung Thanh](https://github.com/trungthanhcva2206) - 2251061885 - 64CNTT.NB
 
 ## NOTE
 
@@ -35,12 +35,11 @@ Repo này chứa mã nguồn cho Ứng dụng học trực tuyến TLULearning, 
 * **Xem các khóa học đã tạo**: Xem danh sách tất cả các khóa học mà mình đã tạo trong hệ thống
 
 ### Tính năng của Quản trị viên:
-* **Quản lý tài khoản người dùng**: Cấp phát và quản lý tài khoản cho sinh viên và giảng viên (tạo tài khoản mới, xem danh sách tài khoản, cập nhật thông tin tài khoản, khóa tài khoản).
+* **Quản lý tài khoản người dùng**: Cấp phát và quản lý tài khoản cho sinh viên và giảng viên (tạo tài khoản mới, xem danh sách tài khoản, cập nhật thông tin tài khoản, khóa tài khoản)
 
 ### Tính năng chung (Đăng nhập và Chat):
-* **Đăng nhập**: Người dùng có thể đăng nhập vào hệ thống bằng tài khoản của mình để sử dụng các chức năng tương ứng với quyền hạn của họ.
-* **Quên mật khẩu**: Người dùng có thể lấy mật khẩu mới khi quên hoặc mất mật khẩu.
-* **Trò chuyện nhóm**: Tham gia trao đổi thông tin chung trong môi trường trò chuyện nhóm theo thời gian thực.
+* **Đăng nhập**: Người dùng có thể đăng nhập vào hệ thống bằng tài khoản của mình để sử dụng các chức năng tương ứng với quyền hạn của họ
+* **Trò chuyện nhóm**: Tham gia trao đổi thông tin chung trong môi trường trò chuyện nhóm theo thời gian thực
 
 ## Công nghệ sử dụng
 
@@ -60,31 +59,31 @@ Repo này chứa mã nguồn cho Ứng dụng học trực tuyến TLULearning, 
 
 ### Cài đặt
 
-1.  **Sao chép kho lưu trữ**:
+1.  **Sao chép kho lưu trữ**
     ```bash
     git clone [https://github.com/trungthanhcva2206/tluonlinelearningapp.git](https://github.com/trungthanhcva2206/tluonlinelearningapp.git)
     ```
-2.  **Mở trong Android Studio**:
-    Mở dự án đã sao chép trong Android Studio.
-3.  **Đồng bộ Gradle**:
-    Android Studio sẽ tự động đồng bộ dự án với các tệp Gradle. Nếu không, hãy đồng bộ thủ công bằng cách nhấp vào "Sync Project with Gradle Files" trên thanh công cụ.
-4.  **Chạy trên thiết bị hoặc trình giả lập**:
-    Chọn một thiết bị hoặc trình giả lập mục tiêu và chạy ứng dụng.
+2.  **Mở trong Android Studio**
+    Mở dự án đã sao chép trong Android Studio
+3.  **Đồng bộ Gradle**
+    Android Studio sẽ tự động đồng bộ dự án với các tệp Gradle. Nếu không, hãy đồng bộ thủ công bằng cách nhấp vào "Sync Project with Gradle Files" trên thanh công cụ
+4.  **Chạy trên thiết bị hoặc trình giả lập**
+    Chọn một thiết bị hoặc trình giả lập mục tiêu và chạy ứng dụng
 
 ## Thiết kế cơ sở dữ liệu
 
-Cơ sở dữ liệu của ứng dụng được thiết kế dựa trên mô hình quan hệ, được chuẩn hóa thành dạng chuẩn BCNF (Boyce-Codd Normal Form) để giảm thiểu sự dư thừa dữ liệu và các bất thường khi cập nhật.
+Cơ sở dữ liệu của ứng dụng được thiết kế dựa trên mô hình quan hệ, được chuẩn hóa thành dạng chuẩn BCNF (Boyce-Codd Normal Form) để giảm thiểu sự dư thừa dữ liệu và các bất thường khi cập nhật
 
 **Các thực thể và thuộc tính chính**:
-* `users`: `user_id` (PK), `username`, `password`, `role`, `avatar_url`, `full_name`, `status`, `created_at`, `updated_at`.
-* `departments`: `department_id` (PK), `department_name`.
-* `courses`: `course_id` (PK), `course_name`, `description`, `thumbnail_url`, `teacher_id` (FK đến `users`), `department_id` (FK đến `departments`), `status`, `created_at`, `updated_at`.
-* `lessons`: `lesson_id` (PK), `course_id` (FK đến `courses`), `lesson_title`, `description`, `order_index`, `created_at`, `updated_at`.
-* `videos`: `video_id` (PK), `lesson_id` (FK đến `lessons`, ràng buộc duy nhất), `video_title`, `video_url`, `duration`, `created_at`, `updated_at`.
-* `documents`: `document_id` (PK), `lesson_id` (FK đến `lessons`), `document_title`, `file_url`, `file_type`, `created_at`, `updated_at`.
-* `course_registrations`: `regis_id` (PK), `user_id` (FK đến `users`), `course_id` (FK đến `courses`), `progress`, `created_at`, `updated_at`.
-* `messages`: `message_id` (PK), `sender_id` (FK đến `users`), `content`, `created_at`.
-* `notifications`: `notif_id` (PK), `user_id` (FK đến `users`), `notif_type`, `content`, `status`, `created_at`.
+* `users`: `user_id` (PK), `username`, `password`, `role`, `avatar_url`, `full_name`, `status`, `created_at`, `updated_at`
+* `departments`: `department_id` (PK), `department_name`
+* `courses`: `course_id` (PK), `course_name`, `description`, `thumbnail_url`, `teacher_id` (FK đến `users`), `department_id` (FK đến `departments`), `status`, `created_at`, `updated_at`
+* `lessons`: `lesson_id` (PK), `course_id` (FK đến `courses`), `lesson_title`, `description`, `order_index`, `created_at`, `updated_at`
+* `videos`: `video_id` (PK), `lesson_id` (FK đến `lessons`, ràng buộc duy nhất), `video_title`, `video_url`, `duration`, `created_at`, `updated_at`
+* `documents`: `document_id` (PK), `lesson_id` (FK đến `lessons`), `document_title`, `file_url`, `file_type`, `created_at`, `updated_at`
+* `course_registrations`: `regis_id` (PK), `user_id` (FK đến `users`), `course_id` (FK đến `courses`), `progress`, `created_at`, `updated_at`
+* `messages`: `message_id` (PK), `sender_id` (FK đến `users`), `content`, `created_at`
+* `notifications`: `notif_id` (PK), `user_id` (FK đến `users`), `notif_type`, `content`, `status`, `created_at`
 
 ## Hướng phát triển trong tương lai
 
