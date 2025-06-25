@@ -5,8 +5,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -34,8 +37,10 @@ public class DanhSachGiangVienActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private GiangVienAdapter adapter;
     private List<GiangVien> danhSachGiangVien;
+    private List<GiangVien> danhSachGiangVienDayDu; // Thêm danh sách này để giữ bản gốc
 
     private ImageView ivAvatar;
+    private EditText edtSearch; // Thêm biến cho EditText
 
     private BottomNavigationView bottomNavigationView;
     private Handler sessionHandler;
@@ -106,6 +111,7 @@ public class DanhSachGiangVienActivity extends AppCompatActivity {
                     try {
                         JSONArray jsonArray = new JSONArray(response);
                         danhSachGiangVien.clear();
+                        danhSachGiangVienDayDu.clear(); // Xóa cả danh sách đầy đủ
 
                         for (int i = 0; i < jsonArray.length(); i++) {
                             JSONObject obj = jsonArray.getJSONObject(i);
@@ -121,6 +127,7 @@ public class DanhSachGiangVienActivity extends AppCompatActivity {
                                     obj.optString("updatedAt")
                             );
                             danhSachGiangVien.add(gv);
+                            danhSachGiangVienDayDu.add(gv); // Thêm vào danh sách đầy đủ
                         }
 
                         adapter.notifyDataSetChanged();
@@ -149,6 +156,7 @@ public class DanhSachGiangVienActivity extends AppCompatActivity {
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         ivAvatar = findViewById(R.id.iv_avatar);
+        edtSearch = findViewById(R.id.edt_search); // Ánh xạ EditText
 
 
         recyclerView = findViewById(R.id.recyclerGiangVien);
@@ -156,6 +164,7 @@ public class DanhSachGiangVienActivity extends AppCompatActivity {
         fetchUserInfo();
         setupSessionCheck();
         danhSachGiangVien = new ArrayList<>();
+        danhSachGiangVienDayDu = new ArrayList<>(); // Khởi tạo
 
 
         adapter = new GiangVienAdapter(danhSachGiangVien, giangVien -> {
@@ -168,6 +177,20 @@ public class DanhSachGiangVienActivity extends AppCompatActivity {
 
         recyclerView.setAdapter(adapter);
         fetchDanhSachGiangVien();
+
+        // --- THÊM LISTENER CHO TÌM KIẾM ---
+        edtSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filter(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
 
         ivAvatar.setOnClickListener(v -> {
             Intent intent = new Intent(DanhSachGiangVienActivity.this, UserProfileActivity.class);
@@ -208,6 +231,20 @@ public class DanhSachGiangVienActivity extends AppCompatActivity {
         });
 
     }
+
+    // --- THÊM PHƯƠNG THỨC LỌC DANH SÁCH ---
+    private void filter(String text) {
+        ArrayList<GiangVien> filteredList = new ArrayList<>();
+        for (GiangVien item : danhSachGiangVienDayDu) {
+            // Lọc theo tên giảng viên (không phân biệt chữ hoa, chữ thường)
+            if (item.getFullname().toLowerCase().contains(text.toLowerCase())) {
+                filteredList.add(item);
+            }
+        }
+        // Cập nhật danh sách hiển thị cho adapter
+        adapter.filterList(filteredList);
+    }
+
 
     private void setupSessionCheck() {
         sessionHandler = new Handler(Looper.getMainLooper());

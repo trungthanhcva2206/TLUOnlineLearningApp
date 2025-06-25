@@ -6,11 +6,14 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -42,8 +45,10 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
     private static final int REQUEST_SUA_KHOA_HOC = 200;
 
     private LinearLayout layoutDsKhoaHoc;
-    private final ArrayList<KhoaHoc> danhSach = new ArrayList<>();
+    private final ArrayList<KhoaHoc> danhSachDayDu = new ArrayList<>();
     private int viTriDangSua = -1;
+
+    private EditText edtTimKiem;
     TextView tv_ten_nguoi_dung;
     ImageView iv_avatar;
 
@@ -124,7 +129,8 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
         // Initialize bottomNavigationView here
         tv_ten_nguoi_dung = findViewById(R.id.tv_ten_nguoi_dung);
         iv_avatar = findViewById(R.id.iv_avatar);
-        bottomNavigationView = findViewById(R.id.bottom_navigation); // Add this line
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
+        edtTimKiem = findViewById(R.id.edt_tim_kiem);
 
         layoutDsKhoaHoc = findViewById(R.id.layout_ds_khoa_hoc);
         Button btnTaoKhoaHoc = findViewById(R.id.btn_tao_khoa_hoc);
@@ -143,6 +149,19 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
         btnTaoKhoaHoc.setOnClickListener(v -> {
             Intent intent = new Intent(QuanLyKhoaHocActivity.this, TaoKhoaHocActivity.class);
             startActivityForResult(intent, REQUEST_TAO_KHOA_HOC);
+        });
+
+        edtTimKiem.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // THAY ĐỔI LOGIC: Gọi hàm tìm kiếm
+                timKiemKhoaHoc(s.toString());
+            }
+            @Override
+            public void afterTextChanged(Editable s) {}
         });
 
         // --- XỬ LÝ THANH ĐIỀU HƯỚNG DƯỚI CÙNG ---
@@ -170,7 +189,35 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
         bottomNavigationView.setSelectedItemId(R.id.nav_courses);
     }
 
-    private void addKhoaHocToLayout(KhoaHoc kh, int position) {
+    // MỚI: Hàm tìm kiếm theo logic của XemKhoaHocActivity
+    private void timKiemKhoaHoc(String tuKhoa) {
+        ArrayList<KhoaHoc> danhSachDaLoc = new ArrayList<>();
+        String lowerCaseTuKhoa = tuKhoa.toLowerCase();
+
+        if (tuKhoa.isEmpty()) {
+            danhSachDaLoc.addAll(danhSachDayDu);
+        } else {
+            for (KhoaHoc kh : danhSachDayDu) {
+                if (kh.ten.toLowerCase().contains(lowerCaseTuKhoa) || kh.moTa.toLowerCase().contains(lowerCaseTuKhoa)) {
+                    danhSachDaLoc.add(kh);
+                }
+            }
+        }
+        // Gọi hàm hiển thị với danh sách đã lọc
+        hienThiDanhSach(danhSachDaLoc);
+    }
+
+    // MỚI: Hàm hiển thị theo logic của XemKhoaHocActivity
+    private void hienThiDanhSach(ArrayList<KhoaHoc> danhSachCanHienThi) {
+        layoutDsKhoaHoc.removeAllViews();
+        for (int i = 0; i < danhSachCanHienThi.size(); i++) {
+            View itemView = createKhoaHocView(danhSachCanHienThi.get(i), i);
+            layoutDsKhoaHoc.addView(itemView);
+        }
+    }
+
+    // Đổi tên từ addKhoaHocToLayout thành createKhoaHocView để logic rõ ràng hơn
+    private View createKhoaHocView(KhoaHoc kh, int position) {
         View itemView = LayoutInflater.from(this).inflate(R.layout.item_khoa_hoc, layoutDsKhoaHoc, false);
         CardView cardView = (CardView) itemView;
 
@@ -189,7 +236,6 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
             startActivityForResult(intent, REQUEST_SUA_KHOA_HOC);
         });
 
-
         itemView.setOnClickListener(v -> {
             Intent intent = new Intent(QuanLyKhoaHocActivity.this, ChiTietKhoaHocActivity.class);
             intent.putExtra("course_id", kh.id);
@@ -200,7 +246,7 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        layoutDsKhoaHoc.addView(itemView);
+        return itemView;
     }
 
     // --- PHIÊN BẢN ĐÃ SỬA LỖI VÀ TỐI ƯU ---
@@ -332,7 +378,7 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
                         Utf8StringRequest  courseRequest = new Utf8StringRequest (Request.Method.GET, urlCourses,
                                 courseResponse -> {
                                     try {
-                                        danhSach.clear();
+                                        danhSachDayDu.clear();
                                         layoutDsKhoaHoc.removeAllViews();
 
                                         org.json.JSONArray courseArray = new org.json.JSONArray(courseResponse);
@@ -350,9 +396,10 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
                                             ArrayList<String> lessons = lessonsMap.getOrDefault(id, new ArrayList<>());
 
                                             KhoaHoc kh = new KhoaHoc(id, title, description, teacher, lessons);
-                                            danhSach.add(kh);
-                                            addKhoaHocToLayout(kh, danhSach.size() - 1);
+                                            danhSachDayDu.add(kh);
                                         }
+                                        // THAY ĐỔI LOGIC: Hiển thị toàn bộ danh sách ban đầu
+                                        hienThiDanhSach(danhSachDayDu);
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                         Toast.makeText(this, "Lỗi xử lý dữ liệu khóa học!", Toast.LENGTH_SHORT).show();

@@ -69,4 +69,11 @@ public class FeaturedCoursesGVAdapter extends RecyclerView.Adapter<FeaturedCours
             btnLessonCount = itemView.findViewById(R.id.btn_so_bai_gv);
         }
     }
+
+    // Trong file FeaturedCoursesGVAdapter.java và MyCoursesGVAdapter.java
+    public void filterList(List<CourseItemGV> filteredList) {
+
+        this.courseList = filteredList;
+        notifyDataSetChanged();
+    }
 }

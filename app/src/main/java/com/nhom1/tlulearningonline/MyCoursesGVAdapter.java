@@ -90,4 +90,9 @@ public class MyCoursesGVAdapter extends RecyclerView.Adapter<MyCoursesGVAdapter.
             btnView = itemView.findViewById(R.id.btn_view_gv);   // Tìm kiếm nút view
         }
     }
+    // Trong file FeaturedCoursesGVAdapter.java và MyCoursesGVAdapter.java
+    public void filterList(List<CourseItemGV> filteredList) {
+        this.courseList = filteredList;
+        notifyDataSetChanged();
+    }
 }

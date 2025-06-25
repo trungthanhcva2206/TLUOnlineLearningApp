@@ -36,6 +36,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.text.Editable;
+import android.text.TextWatcher;
+import java.util.ArrayList;
+import java.util.List;
+
 public class HomeActivity extends AppCompatActivity {
 
     private TextView tvGreeting, tvUserName;
@@ -54,6 +59,8 @@ public class HomeActivity extends AppCompatActivity {
 
     private Handler sessionHandler;
     private Runnable sessionCheckRunnable;
+
+    private List<CourseItem> featuredCoursesListFull = new ArrayList<>(); // << Thêm danh sách này
 
     private void fetchUserInfo() {
         SessionManager sessionManager = new SessionManager(this);
@@ -181,6 +188,19 @@ public class HomeActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        edtSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filterFeaturedCourses(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -202,6 +222,17 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
         bottomNavigationView.setSelectedItemId(R.id.nav_home);
+    }
+
+    private void filterFeaturedCourses(String text) {
+        List<CourseItem> filteredList = new ArrayList<>();
+        for (CourseItem item : featuredCoursesListFull) {
+            if (item.getTitle().toLowerCase().contains(text.toLowerCase())) {
+                filteredList.add(item);
+            }
+        }
+        // Giả sử TopCourseAdapter có phương thức filterList
+        featuredCoursesAdapter.filterList(filteredList);
     }
 
     /**
@@ -257,6 +288,7 @@ public class HomeActivity extends AppCompatActivity {
                             e.printStackTrace();
                         }
                     }
+
 
                     // 2. Tiếp tục gọi lesson và course
                     JsonArrayRequest lessonRequest = new JsonArrayRequest(Request.Method.GET, lessonUrl, null,
@@ -332,7 +364,6 @@ public class HomeActivity extends AppCompatActivity {
                             JSONObject obj = response.getJSONObject(i);
                             String ten = obj.optString("fullname", "Chưa rõ");
                             String avatar = obj.optString("avatar_url", "");
-
                             teacherList.add(new TeacherItem(ten, avatar));
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -348,7 +379,6 @@ public class HomeActivity extends AppCompatActivity {
 
         queue.add(request);
     }
-
 
 
 }
