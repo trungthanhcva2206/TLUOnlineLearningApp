@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -41,6 +42,11 @@ public class SuaKhoaHocActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sua_khoa_hoc);
+        String courseId = getIntent().getStringExtra("course_id");
+        if (courseId != null) {
+            Log.d("SuaKhoaHoc", "Course ID: " + courseId);
+            fetchCourseDetail(courseId); // ⬅ Gọi API ở bước 2
+        }
 
         edtTenKhoaHoc = findViewById(R.id.edt_ten_khoa_hoc);
         edtMoTaKhoaHoc = findViewById(R.id.edt_mo_ta_khoa_hoc);
@@ -179,6 +185,40 @@ public class SuaKhoaHocActivity extends AppCompatActivity {
 
         layoutDanhSachBaiHoc.addView(view);
     }
+
+    private void fetchCourseDetail(String courseId) {
+        String url = "http://14.225.207.221:6060/mobile/courses/" + courseId;
+
+        com.android.volley.RequestQueue queue = com.android.volley.toolbox.Volley.newRequestQueue(this);
+        com.android.volley.toolbox.StringRequest request = new com.android.volley.toolbox.StringRequest(
+                com.android.volley.Request.Method.GET,
+                url,
+                response -> {
+                    try {
+                        org.json.JSONObject obj = new org.json.JSONObject(response);
+
+                        String ten = obj.getString("title");
+                        String moTa = obj.getString("description");
+
+                        // Cập nhật giao diện
+                        edtTenKhoaHoc.setText(ten);
+                        edtMoTaKhoaHoc.setText(moTa);
+
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Toast.makeText(this, "Lỗi xử lý dữ liệu khóa học", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                error -> {
+                    error.printStackTrace();
+                    Toast.makeText(this, "Lỗi tải dữ liệu khóa học!", Toast.LENGTH_SHORT).show();
+                }
+        );
+
+        queue.add(request);
+    }
+
 
     private static class BaiHoc {
         String ten;
