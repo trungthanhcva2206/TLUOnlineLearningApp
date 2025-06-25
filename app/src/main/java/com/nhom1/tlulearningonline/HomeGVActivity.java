@@ -31,11 +31,14 @@ import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class HomeGVActivity extends AppCompatActivity {
 
@@ -73,7 +76,7 @@ public class HomeGVActivity extends AppCompatActivity {
             finish();
             return;
         }
-
+        //
         String url = "http://14.225.207.221:6060/mobile/users/" + userId;
 
         RequestQueue queue = Volley.newRequestQueue(this);
@@ -144,7 +147,8 @@ public class HomeGVActivity extends AppCompatActivity {
 
         // Setup dữ liệu mẫu
         setupDummyData();
-        fetchUserInfo(); // Uncomment để gọi API lấy thông tin giảng viên
+        fetchUserInfo();
+        fetchCourses();// Uncomment để gọi API lấy thông tin giảng viên
         setupSessionCheck();
 
         // Cập nhật thống kê
@@ -251,5 +255,88 @@ public class HomeGVActivity extends AppCompatActivity {
         myCoursesGVList.add(new CourseItemGV("Hệ thống thông tin quản lý",
                 "Tìm hiểu về cách xây dựng và quản lý các hệ thống thông tin trong tổ chức.", 18));
     }
+
+    private void fetchCourses() {
+        SessionManager sm = new SessionManager(this);
+        String userId = sm.getUserId();
+        if (userId == null) return; // hoặc xử lý logout
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+
+        // 1. Lấy tất cả khóa học
+        String urlCourses = "http://14.225.207.221:6060/mobile/courses";
+        StringRequest reqCourses = new Utf8StringRequest(Request.Method.GET, urlCourses,
+                coursesResponse -> {
+                    try {
+                        JSONArray coursesArr = new JSONArray(coursesResponse);
+
+                        // 2. Gọi tiếp API để lấy bài giảng
+                        String urlLessons = "http://14.225.207.221:6060/mobile/lessons";
+                        StringRequest reqLessons = new Utf8StringRequest(Request.Method.GET, urlLessons,
+                                lessonsResponse -> {
+                                    try {
+                                        JSONArray lessonsArr = new JSONArray(lessonsResponse);
+
+                                        // Đếm số bài giảng theo courseId
+                                        Map<String,Integer> lessonCountMap = new HashMap<>();
+                                        for (int i = 0; i < lessonsArr.length(); i++) {
+                                            JSONObject l = lessonsArr.getJSONObject(i);
+                                            String cId = l.optString("courseId");
+                                            lessonCountMap.put(cId, lessonCountMap.getOrDefault(cId, 0) + 1);
+                                        }
+
+                                        // Xoá danh sách cũ
+                                        featuredCoursesGVList.clear();
+                                        myCoursesGVList.clear();
+
+                                        // 3. Lặp qua tất cả các khóa học
+                                        for (int i = 0; i < coursesArr.length(); i++) {
+                                            JSONObject c = coursesArr.getJSONObject(i);
+
+                                            String id     = c.getString("id");
+                                            String title  = c.getString("title");
+                                            String desc   = c.getString("description");
+                                            String tId    = c.getString("teacherId");
+                                            int count     = lessonCountMap.getOrDefault(id, 0);
+
+                                            CourseItemGV item = new CourseItemGV(title, desc, count);
+
+                                            // ✅ Thêm vào danh sách featured (tất cả các khóa học)
+                                            featuredCoursesGVList.add(item);
+
+                                            // ✅ Nếu là của giảng viên hiện tại thì thêm vào danh sách của tôi
+                                            if (userId.equals(tId)) {
+                                                myCoursesGVList.add(item);
+                                            }
+                                        }
+
+                                        // Thông báo adapter cập nhật UI
+                                        featuredCoursesGVAdapter.notifyDataSetChanged();
+                                        myCoursesGVAdapter.notifyDataSetChanged();
+
+                                        // Cập nhật số liệu thống kê
+                                        tvActiveCoursesCount.setText(String.valueOf(myCoursesGVList.size()));
+                                        tvTotalLectures.setText(String.valueOf(lessonCountMap.size()));
+
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                },
+                                error -> Toast.makeText(this, "Không tải được danh sách bài học", Toast.LENGTH_SHORT).show()
+                        );
+
+                        queue.add(reqLessons);
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                },
+                error -> Toast.makeText(this, "Không tải được danh sách khóa học", Toast.LENGTH_SHORT).show()
+        );
+
+        queue.add(reqCourses);
+    }
+
+
 
 }

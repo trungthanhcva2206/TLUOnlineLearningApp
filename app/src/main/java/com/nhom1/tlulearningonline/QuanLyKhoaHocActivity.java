@@ -307,24 +307,28 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
 
         RequestQueue queue = Volley.newRequestQueue(this);
 
-        // B1: Lấy toàn bộ lessons trước
+        // Lấy userId từ session
+        SessionManager sessionManager = new SessionManager(this);
+        String userId = sessionManager.getUserId();
+        if (userId == null || userId.isEmpty()) {
+            Toast.makeText(this, "Không tìm thấy userId!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // B1: Lấy toàn bộ lessons
         StringRequest lessonRequest = new StringRequest(Request.Method.GET, urlLessons,
                 response -> {
                     try {
-                        // B1.1: Đếm số bài học theo courseId
                         HashMap<String, ArrayList<String>> lessonsMap = new HashMap<>();
                         org.json.JSONArray lessonsArray = new org.json.JSONArray(response);
                         for (int i = 0; i < lessonsArray.length(); i++) {
                             JSONObject lesson = lessonsArray.getJSONObject(i);
                             String courseId = lesson.getString("courseId");
                             String lessonTitle = lesson.getString("title");
-                            if (!lessonsMap.containsKey(courseId)) {
-                                lessonsMap.put(courseId, new ArrayList<>());
-                            }
-                            lessonsMap.get(courseId).add(lessonTitle);
+                            lessonsMap.computeIfAbsent(courseId, k -> new ArrayList<>()).add(lessonTitle);
                         }
 
-                        // B2: Gọi API khóa học
+                        // B2: Lấy danh sách khóa học
                         StringRequest courseRequest = new StringRequest(Request.Method.GET, urlCourses,
                                 courseResponse -> {
                                     try {
@@ -334,6 +338,11 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
                                         org.json.JSONArray courseArray = new org.json.JSONArray(courseResponse);
                                         for (int i = 0; i < courseArray.length(); i++) {
                                             JSONObject obj = courseArray.getJSONObject(i);
+                                            String teacherId = obj.getString("teacherId");
+
+                                            // ❗❗❗ CHỈ LẤY CÁC KHÓA CỦA GIẢNG VIÊN ĐANG ĐĂNG NHẬP
+                                            if (!userId.equals(teacherId)) continue;
+
                                             String id = obj.getString("id");
                                             String title = obj.getString("title");
                                             String description = obj.getString("description");
@@ -347,7 +356,7 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
                                         }
                                     } catch (Exception e) {
                                         e.printStackTrace();
-                                        Toast.makeText(this, "Lỗi xử lý course JSON", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(this, "Lỗi xử lý dữ liệu khóa học!", Toast.LENGTH_SHORT).show();
                                     }
                                 },
                                 error -> {
@@ -358,6 +367,7 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
                         queue.add(courseRequest);
                     } catch (Exception e) {
                         e.printStackTrace();
+                        Toast.makeText(this, "Lỗi xử lý dữ liệu bài học!", Toast.LENGTH_SHORT).show();
                     }
                 },
                 error -> {
@@ -367,6 +377,7 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
         );
         queue.add(lessonRequest);
     }
+
 
     static class CustomViewBinder {
         public static void bind(View itemView, KhoaHoc kh) {
