@@ -6,86 +6,164 @@
     android:layout_height="match_parent"
     >
 
-    <!-- HEADER -->
-    <LinearLayout
-        android:id="@+id/layout_header"
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp"
         android:background="#FFFFFF"
-        android:elevation="4dp">
+        android:elevation="4dp"
+        app:liftOnScroll="true">
 
-        <!-- Lời chào -->
         <LinearLayout
+            android:id="@+id/layout_header_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:orientation="vertical"
+            android:padding="16dp">
 
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="12dp">
 
-                <TextView
-                    android:id="@+id/tv_greeting"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Xin chào,"
-                    android:textSize="14sp"
-                    android:textColor="#666666" />
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/tv_ten_nguoi_dung"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Phương Anh 👋"
-                    android:textStyle="bold"
-                    android:textSize="14sp"
-                    android:textColor="@color/blue" />
+                    <TextView
+                        android:id="@+id/tv_greeting"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Xin chào,"
+                        android:textSize="14sp"
+                        android:textColor="#666666" />
+
+                    <TextView
+                        android:id="@+id/tv_ten_nguoi_dung"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Phương Anh 👋"
+                        android:textStyle="bold"
+                        android:textSize="14sp"
+                        android:textColor="@color/blue" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1"/>
+
+                <ImageView
+                    android:id="@+id/iv_thong_bao"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_bell"
+                    android:layout_marginEnd="12dp"
+                    app:tint="@color/blue"/>
+
+                <ImageView
+                    android:id="@+id/iv_avatar"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_avatar"
+                    android:background="@drawable/bg_avatar_circle"
+                    android:scaleType="centerCrop" />
             </LinearLayout>
 
-            <View
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_weight="1"/>
+            <EditText
+                android:id="@+id/edt_tim_kiem"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:hint="Tìm kiếm khóa học"
+                android:drawableEnd="@drawable/ic_search"
+                android:paddingStart="16dp"
+                android:background="@drawable/bg_search"
+                android:layout_marginTop="12dp"/>
 
-            <ImageView
-                android:id="@+id/iv_thong_bao"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_bell"
-                android:layout_marginEnd="12dp"
-                app:tint="@color/blue"/>
-
-            <ImageView
-                android:id="@+id/iv_avatar"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:src="@drawable/ic_avatar"
-                android:background="@drawable/bg_avatar_circle"
-                android:scaleType="centerCrop" />
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                android:overScrollMode="never"
+                android:layout_marginTop="12dp">
+                <LinearLayout
+                    android:id="@+id/horizontal_chip_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView
+                        style="@style/Widget.MaterialComponents.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Công nghệ phần mềm"
+                        android:background="@drawable/bg_filter_chip"
+                        android:textColor="@color/blue"
+                        android:paddingHorizontal="16dp"
+                        android:paddingVertical="8dp"
+                        android:layout_marginEnd="8dp" />
+                    <TextView
+                        style="@style/Widget.MaterialComponents.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tin học và Kỹ thuật tính toán"
+                        android:background="@drawable/bg_filter_chip"
+                        android:textColor="@color/blue"
+                        android:paddingHorizontal="16dp"
+                        android:paddingVertical="8dp"
+                        android:layout_marginEnd="8dp"/>
+                    <TextView
+                        style="@style/Widget.MaterialComponents.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Trí tuệ nhân tạo"
+                        android:background="@drawable/bg_filter_chip"
+                        android:textColor="@color/blue"
+                        android:paddingHorizontal="16dp"
+                        android:paddingVertical="8dp"
+                        android:layout_marginEnd="8dp"/>
+                    <TextView
+                        style="@style/Widget.MaterialComponents.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Hệ thống thông tin"
+                        android:background="@drawable/bg_filter_chip"
+                        android:textColor="@color/blue"
+                        android:paddingHorizontal="16dp"
+                        android:paddingVertical="8dp"
+                        android:layout_marginEnd="8dp" />
+                    <TextView
+                        style="@style/Widget.MaterialComponents.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Mạng và An toàn thông tin"
+                        android:background="@drawable/bg_filter_chip"
+                        android:textColor="@color/blue"
+                        android:paddingHorizontal="16dp"
+                        android:paddingVertical="8dp"
+                        android:layout_marginEnd="8dp" />
+                    <TextView
+                        style="@style/Widget.MaterialComponents.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Toán học"
+                        android:background="@drawable/bg_filter_chip"
+                        android:textColor="@color/blue"
+                        android:paddingHorizontal="16dp"
+                        android:paddingVertical="8dp"
+                        android:layout_marginEnd="8dp" />
+                </LinearLayout>
+            </HorizontalScrollView>
         </LinearLayout>
+    </com.google.android.material.appbar.AppBarLayout>
 
-        <!-- Tìm kiếm -->
-        <EditText
-            android:id="@+id/edt_tim_kiem"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:hint="Tìm kiếm khóa học"
-            android:drawableEnd="@drawable/ic_search"
-            android:paddingStart="16dp"
-            android:background="@drawable/bg_search"
-            android:layout_marginTop="12dp"/>
-    </LinearLayout>
-
-    <!-- NỘI DUNG SCROLL -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="110dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:layout_marginBottom="80dp"
         android:paddingHorizontal="16dp"
         android:paddingTop="8dp"
@@ -109,18 +187,15 @@
                 android:gravity="center"
                 android:visibility="gone"
                 android:padding="24dp" />
-            <!-- Tiêu đề 1 -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Khóa học đã tham gia"
-                android:layout_marginTop="24dp"
                 android:textStyle="bold"
                 android:textSize="18sp"
                 android:textColor="#000000"
                 android:paddingVertical="8dp" />
 
-            <!-- Danh sách dọc -->
             <LinearLayout
                 android:id="@+id/layout_khoa_hoc_tham_gia"
                 android:layout_width="345dp"
@@ -129,9 +204,20 @@
                 android:layout_marginTop="16dp"
                 android:gravity="center_horizontal" />
 
+<<<<<<< feature/45-fix-UI
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Khóa học đã lưu"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:textColor="#000000"
+                android:paddingVertical="8dp"
+                android:layout_marginTop="24dp" />
+=======
 
+>>>>>>> develop
 
-            <!-- Danh sách ngang -->
             <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -148,7 +234,6 @@
         </LinearLayout>
     </ScrollView>
 
-    <!-- Bottom Navigation -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"

@@ -15,13 +15,13 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Button; // Import Button to use btnSoBaiHoc
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
-import android.widget.ProgressBar; // Import ProgressBar
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -52,6 +52,9 @@ public class XemKhoaHocActivity extends AppCompatActivity {
     private BottomNavigationView bottomNavigationView;
     private Handler sessionHandler;
     private Runnable sessionCheckRunnable;
+
+    // Thêm tham chiếu đến LinearLayout chứa các filter chips
+    private LinearLayout layoutFilterChips;
 
 
     private void fetchUserInfo() {
@@ -127,13 +130,35 @@ public class XemKhoaHocActivity extends AppCompatActivity {
         tvKhongTimThay = findViewById(R.id.tv_khong_tim_thay);
         ivAvatar = findViewById(R.id.iv_avatar);
 
+        // Ánh xạ LinearLayout chứa các filter chips
+        LinearLayout horizontalChipContainer = findViewById(R.id.horizontal_chip_container); // ID của LinearLayout bên trong HorizontalScrollView
+        if (horizontalChipContainer != null) {
+            layoutFilterChips = horizontalChipContainer;
+        }
+
         fetchUserInfo();
         setupSessionCheck();
 
+<<<<<<< feature/45-fix-UI
+        // Dữ liệu mẫu (nếu bạn có dữ liệu thật từ API thì bỏ qua phần này)
+        khoaHocThamGia.add(new KhoaHoc("Tương tác người máy", "GV: Nguyễn Thị Thu Hương", "Bộ môn Công nghệ phần mềm", 80, 15));
+        khoaHocThamGia.add(new KhoaHoc("Công nghệ Web", "GV: Nguyễn Tu Trung", "Bộ môn Hệ thống thông tin", 25, 10));
+        khoaHocThamGia.add(new KhoaHoc("Lập trình Java", "GV: Trần Văn B", "Bộ môn Công nghệ phần mềm", 60, 20));
+        khoaHocThamGia.add(new KhoaHoc("Cơ sở dữ liệu", "GV: Trần Hồng Diệp", "Bộ môn Hệ thống thông tin", 45, 12));
+=======
         fetchKhoaHocThamGia();
+>>>>>>> develop
 
 
-        hienThiKhoaHoc();
+        // Kiểm tra Intent để lấy từ khóa tìm kiếm từ HomeActivity
+        Intent incomingIntent = getIntent();
+        if (incomingIntent != null && incomingIntent.hasExtra("search_query")) {
+            String searchQuery = incomingIntent.getStringExtra("search_query");
+            edtTimKiem.setText(searchQuery);
+            displayCourses(searchQuery); // Gọi phương thức hiển thị chung
+        } else {
+            displayCourses(""); // Hiển thị tất cả khóa học ban đầu
+        }
 
         edtTimKiem.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -141,16 +166,31 @@ public class XemKhoaHocActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                timKiemKhoaHoc(s.toString());
+                displayCourses(s.toString()); // Gọi phương thức hiển thị chung
             }
         });
+
+        // Gán sự kiện click cho các TextView bộ môn
+        if (layoutFilterChips != null) {
+            for (int i = 0; i < layoutFilterChips.getChildCount(); i++) {
+                View child = layoutFilterChips.getChildAt(i);
+                if (child instanceof TextView) {
+                    TextView departmentChip = (TextView) child;
+                    departmentChip.setOnClickListener(v -> {
+                        String departmentName = departmentChip.getText().toString();
+                        edtTimKiem.setText(departmentName); // Cập nhật search bar
+                        displayCourses(departmentName); // Lọc theo bộ môn
+                    });
+                }
+            }
+        }
+
 
         ivAvatar.setOnClickListener(v -> {
             Intent intent = new Intent(XemKhoaHocActivity.this, UserProfileActivity.class);
             startActivity(intent);
         });
 
-        // --- XỬ LÝ THANH ĐIỀU HƯỚNG DƯỚI CÙNG ---
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -165,7 +205,6 @@ public class XemKhoaHocActivity extends AppCompatActivity {
                     return true;
                 } else if (itemId == R.id.nav_profile) {
                     startActivity(new Intent(XemKhoaHocActivity.this, UserProfileActivity.class));
-                    // finish();
                     return true;
                 }
                 return false;
@@ -174,15 +213,39 @@ public class XemKhoaHocActivity extends AppCompatActivity {
         bottomNavigationView.setSelectedItemId(R.id.nav_courses);
     }
 
-    private void hienThiKhoaHoc() {
+    // Phương thức hiển thị và lọc khóa học chung
+    private void displayCourses(String filterText) {
         layoutThamGia.removeAllViews();
         layoutDaLuu.removeAllViews();
 
+        int totalFilteredCount = 0;
+        String lowerCaseFilter = filterText.toLowerCase().trim();
+
+        // Lọc và hiển thị Khóa học đã tham gia
         for (int i = 0; i < khoaHocThamGia.size(); i++) {
+<<<<<<< feature/45-fix-UI
+            KhoaHoc kh = khoaHocThamGia.get(i);
+            if (lowerCaseFilter.isEmpty() ||
+                    kh.ten.toLowerCase().contains(lowerCaseFilter) ||
+                    kh.boMon.toLowerCase().contains(lowerCaseFilter)) {
+                layoutThamGia.addView(createCard(kh, false, i));
+                totalFilteredCount++;
+            }
+=======
             layoutThamGia.addView(createCard(khoaHocThamGia.get(i), true, i));
+>>>>>>> develop
         }
 
+        // Lọc và hiển thị Khóa học đã lưu
         for (int i = 0; i < khoaHocDaLuu.size(); i++) {
+<<<<<<< feature/45-fix-UI
+            KhoaHoc kh = khoaHocDaLuu.get(i);
+            if (lowerCaseFilter.isEmpty() ||
+                    kh.ten.toLowerCase().contains(lowerCaseFilter) ||
+                    kh.boMon.toLowerCase().contains(lowerCaseFilter)) {
+                layoutDaLuu.addView(createCard(kh, true, i));
+                totalFilteredCount++;
+=======
             layoutDaLuu.addView(createCard(khoaHocDaLuu.get(i), true, i));
         }
     }
@@ -198,15 +261,18 @@ public class XemKhoaHocActivity extends AppCompatActivity {
             if (kh.ten.toLowerCase().contains(tuKhoa.toLowerCase())) {
                 layoutThamGia.addView(createCard(kh, false, i)); // Use item_khoa_hoc_sv_progress
                 dem++;
+>>>>>>> develop
             }
         }
 
-        if (dem == 0) {
+        // Cập nhật trạng thái "Không tìm thấy"
+        if (totalFilteredCount == 0) {
             tvKhongTimThay.setVisibility(View.VISIBLE);
         } else {
             tvKhongTimThay.setVisibility(View.GONE);
         }
     }
+
 
     private View createCard(KhoaHoc kh, boolean daLuu, int position) {
         View view;
@@ -214,9 +280,9 @@ public class XemKhoaHocActivity extends AppCompatActivity {
         TextView txtGiangVien;
         TextView txtBoMon;
         ImageView btnSave;
-        CardView cardView; // Declare CardView here
+        CardView cardView;
 
-        if (!daLuu) { // For "Khóa học đã tham gia" -> use item_khoa_hoc_sv_progress
+        if (!daLuu) {
             view = LayoutInflater.from(this).inflate(R.layout.item_khoa_hoc_sv_progress, null);
             txtTenKhoaHoc = view.findViewById(R.id.txt_ten_khoa_hoc);
             txtGiangVien = view.findViewById(R.id.txt_giang_vien);
@@ -232,12 +298,12 @@ public class XemKhoaHocActivity extends AppCompatActivity {
             progressBar.setProgress(kh.tienDo);
             txtTienDo.setText(kh.tienDo + "%");
 
-        } else { // For "Khóa học đã lưu" -> use item_khoa_hoc_sv
+        } else {
             view = LayoutInflater.from(this).inflate(R.layout.item_khoa_hoc_sv, null);
             txtTenKhoaHoc = view.findViewById(R.id.txt_ten_khoa_hoc);
             txtGiangVien = view.findViewById(R.id.txt_giang_vien);
             txtBoMon = view.findViewById(R.id.txt_bo_mon);
-            Button btnSoBaiHoc = view.findViewById(R.id.btn_so_bai_hoc); // Specific to item_khoa_hoc_sv
+            Button btnSoBaiHoc = view.findViewById(R.id.btn_so_bai_hoc);
             btnSave = view.findViewById(R.id.btn_save);
 
             txtTenKhoaHoc.setText(kh.ten);
@@ -246,18 +312,17 @@ public class XemKhoaHocActivity extends AppCompatActivity {
             btnSoBaiHoc.setText(kh.soBaiHoc + " bài học");
         }
 
-        cardView = (CardView) view; // Cast the inflated view to CardView
-
-        // Set alternating background colors
+        cardView = (CardView) view;
         int colorId = (position % 2 == 0) ? R.color.blue_3 : R.color.blue;
         cardView.setCardBackgroundColor(ContextCompat.getColor(this, colorId));
 
-        // Set star icon (common to both)
         btnSave.setImageResource(daLuu ? R.drawable.ic_star_filled : R.drawable.ic_star_border);
 
         btnSave.setOnClickListener(v -> {
             if (daLuu) {
-                layoutDaLuu.removeView((View) v.getParent().getParent().getParent()); // Correctly remove the wrapper view
+                // Giả định v.getParent().getParent().getParent() là LinearLayout wrapper
+                LinearLayout parentWrapper = (LinearLayout) v.getParent().getParent().getParent();
+                ((LinearLayout)parentWrapper.getParent()).removeView(parentWrapper); // Xóa khỏi layout chứa nó
                 khoaHocDaLuu.remove(kh);
             } else {
                 khoaHocDaLuu.add(kh);
@@ -307,10 +372,10 @@ public class XemKhoaHocActivity extends AppCompatActivity {
                 startActivity(intent);
                 finish();
             } else {
-                sessionHandler.postDelayed(sessionCheckRunnable, 10000); // 10 giây kiểm tra lại
+                sessionHandler.postDelayed(sessionCheckRunnable, 10000);
             }
         };
-        sessionHandler.postDelayed(sessionCheckRunnable, 10000); // bắt đầu sau 10 giây
+        sessionHandler.postDelayed(sessionCheckRunnable, 10000);
     }
     public static class KhoaHoc {
         String id, ten, giangVien, boMon, des;
@@ -327,8 +392,13 @@ public class XemKhoaHocActivity extends AppCompatActivity {
             this.des = des;
         }
 
+<<<<<<< feature/45-fix-UI
+        public KhoaHoc(String ten, String giangVien, String boMon, int tienDo) {
+            this(ten, giangVien, boMon, tienDo, 0);
+=======
         public String getDes() {
             return des;
+>>>>>>> develop
         }
 
         public String getId() { return id; }
