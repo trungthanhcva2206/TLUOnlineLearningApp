@@ -40,6 +40,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.text.Editable;
+import android.text.TextWatcher;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 public class HomeGVActivity extends AppCompatActivity {
 
     private TextView tvGreeting, tvUserName;
@@ -61,6 +67,11 @@ public class HomeGVActivity extends AppCompatActivity {
 
     private Handler sessionHandler;
     private Runnable sessionCheckRunnable;
+
+
+    private List<CourseItemGV> featuredCoursesGVListFull = new ArrayList<>(); // << Thêm danh sách này
+
+    private List<CourseItemGV> myCoursesGVListFull = new ArrayList<>(); // << Thêm danh sách này
 
 
     private void fetchUserInfo() {
@@ -175,7 +186,8 @@ public class HomeGVActivity extends AppCompatActivity {
         edtSearch.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // Triển khai logic tìm kiếm ở đây
+                // Lọc cả hai danh sách
+                filterFeaturedCoursesGV(s.toString());
             }
             @Override public void afterTextChanged(Editable s) {}
         });
@@ -239,6 +251,18 @@ public class HomeGVActivity extends AppCompatActivity {
      * Tạo dữ liệu mẫu cho các danh sách khóa học nổi bật và khóa học của tôi.
      */
 
+    // --- THÊM CÁC PHƯƠNG THỨC LỌC ---
+    private void filterFeaturedCoursesGV(String text) {
+        List<CourseItemGV> filteredList = new ArrayList<>();
+        for (CourseItemGV item : featuredCoursesGVListFull) {
+            if (item.getTitle().toLowerCase().contains(text.toLowerCase())) {
+                filteredList.add(item);
+            }
+        }
+        featuredCoursesGVAdapter.filterList(filteredList);
+    }
+
+
     private void fetchCourses() {
         SessionManager sm = new SessionManager(this);
         String userId = sm.getUserId();
@@ -271,6 +295,8 @@ public class HomeGVActivity extends AppCompatActivity {
                                         // Xoá danh sách cũ
                                         featuredCoursesGVList.clear();
                                         myCoursesGVList.clear();
+                                        featuredCoursesGVListFull.clear(); // << Xóa
+                                        myCoursesGVListFull.clear();
 
                                         // 3. Lặp qua tất cả các khóa học
                                         for (int i = 0; i < coursesArr.length(); i++) {
@@ -289,9 +315,11 @@ public class HomeGVActivity extends AppCompatActivity {
                                             CourseItemGV item = new CourseItemGV(id,title, desc, count,teacherName);
 
                                             featuredCoursesGVList.add(item);
+                                            featuredCoursesGVListFull.add(item);
 
                                             if (userId.equals(tId)) {
                                                 myCoursesGVList.add(item);
+                                                myCoursesGVListFull.add(item);
                                             }
                                         }
 

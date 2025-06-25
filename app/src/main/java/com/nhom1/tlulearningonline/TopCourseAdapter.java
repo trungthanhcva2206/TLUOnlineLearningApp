@@ -94,6 +94,12 @@ public class TopCourseAdapter extends RecyclerView.Adapter<TopCourseAdapter.Cour
         });
     }
 
+    // Trong file TopCourseAdapter.java
+    public void filterList(List<CourseItem> filteredList) {
+        this.courseList = filteredList;
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getItemCount() {
         return courseList.size();
