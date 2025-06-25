@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -47,6 +48,8 @@ public class HomeGVActivity extends AppCompatActivity {
 
     private com.nhom1.tlulearningonline.adapters.FeaturedCoursesGVAdapter featuredCoursesGVAdapter;
     private com.nhom1.tlulearningonline.adapters.MyCoursesGVAdapter myCoursesGVAdapter;
+    TextView tv_user_name;
+    ImageView iv_avatar;
 
     private List<CourseItemGV> featuredCoursesGVList = new ArrayList<>();
     private List<CourseItemGV> myCoursesGVList = new ArrayList<>();
@@ -56,10 +59,71 @@ public class HomeGVActivity extends AppCompatActivity {
     private Handler sessionHandler;
     private Runnable sessionCheckRunnable;
 
+
+    private void fetchUserInfo() {
+        SessionManager sessionManager = new SessionManager(this);
+        String userId = sessionManager.getUserId();
+
+        if (userId == null || userId.isEmpty()) {
+            Toast.makeText(this, "Không tìm thấy userId!", Toast.LENGTH_SHORT).show();
+            sessionManager.clearSession();
+            Intent intent = new Intent(HomeGVActivity.this, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+            return;
+        }
+
+        String url = "http://14.225.207.221:6060/mobile/users/" + userId;
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+        Utf8StringRequest request = new Utf8StringRequest(Request.Method.GET, url,
+                response -> {
+                    try {
+                        JSONObject user = new JSONObject(response);
+                        String fullName = user.optString("fullname", "Người dùng");
+                        String avatarUrl = user.optString("avatar_url", "");
+
+                        tv_user_name.setText(fullName + " 👋");
+
+                        if (avatarUrl != null && !avatarUrl.isEmpty()) {
+                            Log.d("AvatarURL", avatarUrl);
+                            Glide.with(this)
+                                    .load(avatarUrl)
+                                    .placeholder(R.drawable.ic_avatar)
+                                    .error(R.drawable.ic_avatar)
+                                    .circleCrop()
+                                    .into(iv_avatar);
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(this, "Lỗi xử lý JSON!", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                error -> {
+                    if (error.networkResponse != null && error.networkResponse.statusCode == 401) {
+                        sessionManager.clearSession();
+                        Toast.makeText(this, "Phiên đăng nhập đã hết hạn!", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(HomeGVActivity.this, LoginActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        error.printStackTrace();
+                        Toast.makeText(this, "Lỗi kết nối tới máy chủ!", Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+
+        queue.add(request);
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_gv);
+        tv_user_name = findViewById(R.id.tv_user_name);
+        iv_avatar = findViewById(R.id.iv_avatar);
 
         // Ánh xạ View
         tvGreeting = findViewById(R.id.tv_greeting);
@@ -80,7 +144,7 @@ public class HomeGVActivity extends AppCompatActivity {
 
         // Setup dữ liệu mẫu
         setupDummyData();
-        // fetchUserInfo(); // Uncomment để gọi API lấy thông tin giảng viên
+        fetchUserInfo(); // Uncomment để gọi API lấy thông tin giảng viên
         setupSessionCheck();
 
         // Cập nhật thống kê
@@ -150,11 +214,6 @@ public class HomeGVActivity extends AppCompatActivity {
         tvTotalDocuments.setText(String.valueOf(70));   // Lấy từ dữ liệu thực tế
     }
 
-    private void fetchUserInfo() {
-        // Logic gọi API lấy thông tin người dùng giảng viên
-        // Tương tự như fetchUserInfo trong HomeActivity của sinh viên
-        // Cập nhật tvUserName và ivAvatar
-    }
 
     private void setupSessionCheck() {
         sessionHandler = new Handler(Looper.getMainLooper());

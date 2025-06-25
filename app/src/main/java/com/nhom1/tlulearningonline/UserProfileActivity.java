@@ -104,7 +104,7 @@ public class UserProfileActivity extends AppCompatActivity {
         String url = "http://14.225.207.221:6060/mobile/users/" + userId;
 
         RequestQueue queue = Volley.newRequestQueue(this);
-        StringRequest request = new StringRequest(Request.Method.GET, url,
+        Utf8StringRequest request = new Utf8StringRequest(Request.Method.GET, url,
                 response -> {
                     try {
                         JSONObject user = new JSONObject(response);
