@@ -9,9 +9,14 @@ import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,16 +49,19 @@ public class HomeActivity extends AppCompatActivity {
     private ImageView ivSeeMoreCourses, ivSeeMoreLecturers;
     private RecyclerView recyclerFeaturedCourses, recyclerInProgressCourses, recyclerTeachers;
     private TopCourseAdapter featuredCoursesAdapter;
-    private FeaturedCoursesAdapter inProgressCoursesAdapter;
+//    private FeaturedCoursesAdapter inProgressCoursesAdapter;
     private TeachersAdapter teachersAdapter;
     private List<CourseItem> featuredCoursesList = new ArrayList<>();
-    private List<CourseItem> inProgressCoursesList = new ArrayList<>();
+//    private List<CourseItem> inProgressCoursesList = new ArrayList<>();
     private List<TeacherItem> teacherList = new ArrayList<>();
 
     private BottomNavigationView bottomNavigationView;
 
     private Handler sessionHandler;
     private Runnable sessionCheckRunnable;
+
+    // Thêm tham chiếu cho LinearLayout chứa các filter chips
+    private LinearLayout horizontalDepartmentChipsContainer;
 
     private void fetchUserInfo() {
         SessionManager sessionManager = new SessionManager(this);
@@ -127,29 +135,31 @@ public class HomeActivity extends AppCompatActivity {
         edtSearch = findViewById(R.id.edt_search);
 
         recyclerFeaturedCourses = findViewById(R.id.recycler_featured_courses);
-        recyclerInProgressCourses = findViewById(R.id.inprogress_course);
+//        recyclerInProgressCourses = findViewById(R.id.inprogress_course);
         recyclerTeachers = findViewById(R.id.recycler_lecturers);
 
         ivSeeMoreLecturers = findViewById(R.id.iv_see_more_lecturers);
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
+        // Ánh xạ LinearLayout chứa các filter chips
+        horizontalDepartmentChipsContainer = findViewById(R.id.horizontal_chip_container);
+
+
         setupDummyData();
         fetchLessonsAndCourses();
         fetchUserInfo();
         setupSessionCheck();
 
-        // Use TopCourseAdapter for featured courses (no progress bar)
-        featuredCoursesAdapter = new TopCourseAdapter(featuredCoursesList); // CHANGED HERE
+        featuredCoursesAdapter = new TopCourseAdapter(featuredCoursesList);
         LinearLayoutManager featuredCoursesLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         recyclerFeaturedCourses.setLayoutManager(featuredCoursesLayoutManager);
         recyclerFeaturedCourses.setAdapter(featuredCoursesAdapter);
 
-        // Use FeaturedCoursesAdapter for in-progress courses (with progress bar)
-        inProgressCoursesAdapter = new FeaturedCoursesAdapter(inProgressCoursesList);
-        LinearLayoutManager inProgressCoursesLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-        recyclerInProgressCourses.setLayoutManager(inProgressCoursesLayoutManager);
-        recyclerInProgressCourses.setAdapter(inProgressCoursesAdapter);
+//        inProgressCoursesAdapter = new FeaturedCoursesAdapter(inProgressCoursesList);
+//        LinearLayoutManager inProgressCoursesLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+//        recyclerInProgressCourses.setLayoutManager(inProgressCoursesLayoutManager);
+//        recyclerInProgressCourses.setAdapter(inProgressCoursesAdapter);
 
         teachersAdapter = new TeachersAdapter(teacherList);
         LinearLayoutManager teachersLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
@@ -162,18 +172,29 @@ public class HomeActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        edtSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // Bạn có thể triển khai logic lọc tìm kiếm ở đây.
-                // Hiện tại, chỉ là một Toast.
-                // Toast.makeText(HomeActivity.this, "Tìm kiếm: " + s.toString(), Toast.LENGTH_SHORT).show();
-            }
-            @Override
-            public void afterTextChanged(Editable s) {}
+        // Xử lý khi nhấn vào thanh tìm kiếm (chuyển hướng ngay lập tức)
+        edtSearch.setOnClickListener(v -> {
+            Intent intent = new Intent(HomeActivity.this, XemKhoaHocActivity.class);
+            startActivity(intent);
         });
+
+        // Xử lý khi nhấn vào từng chip bộ môn
+        if (horizontalDepartmentChipsContainer != null) {
+            for (int i = 0; i < horizontalDepartmentChipsContainer.getChildCount(); i++) {
+                View child = horizontalDepartmentChipsContainer.getChildAt(i);
+                if (child instanceof TextView) {
+                    TextView departmentChip = (TextView) child;
+                    departmentChip.setOnClickListener(v -> {
+                        String departmentName = departmentChip.getText().toString();
+                        // Chuyển hướng sang XemKhoaHocActivity và truyền tên bộ môn
+                        Intent intent = new Intent(HomeActivity.this, XemKhoaHocActivity.class);
+                        intent.putExtra("search_query", departmentName); // Sử dụng cùng key với search bar
+                        startActivity(intent);
+                    });
+                }
+            }
+        }
+
 
         ivSeeMoreLecturers.setOnClickListener(v -> {
             Intent intent = new Intent(HomeActivity.this, DanhSachGiangVienActivity.class);
@@ -194,7 +215,6 @@ public class HomeActivity extends AppCompatActivity {
                     return true;
                 } else if (itemId == R.id.nav_profile) {
                     startActivity(new Intent(HomeActivity.this, UserProfileActivity.class));
-                    // finish();
                     return true;
                 }
                 return false;
@@ -203,9 +223,19 @@ public class HomeActivity extends AppCompatActivity {
         bottomNavigationView.setSelectedItemId(R.id.nav_home);
     }
 
-    /**
-     * Tạo dữ liệu mẫu cho các danh sách khóa học nổi bật, khóa học đang học và giảng viên.
-     */
+    private void performSearch() {
+        // Phương thức này hiện tại không còn được gọi trực tiếp từ UI trong HomeActivity
+        // Nó có thể được xóa hoặc giữ lại nếu bạn có ý định dùng nó ở nơi khác.
+        String searchQuery = edtSearch.getText().toString().trim();
+        if (!searchQuery.isEmpty()) {
+            Intent searchIntent = new Intent(HomeActivity.this, XemKhoaHocActivity.class);
+            searchIntent.putExtra("search_query", searchQuery);
+            startActivity(searchIntent);
+        } else {
+            Toast.makeText(HomeActivity.this, "Vui lòng nhập từ khóa tìm kiếm!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void setupSessionCheck() {
         sessionHandler = new Handler(Looper.getMainLooper());
         sessionCheckRunnable = () -> {
@@ -217,22 +247,17 @@ public class HomeActivity extends AppCompatActivity {
                 startActivity(intent);
                 finish();
             } else {
-                sessionHandler.postDelayed(sessionCheckRunnable, 10000); // 10 giây kiểm tra lại
+                sessionHandler.postDelayed(sessionCheckRunnable, 10000);
             }
         };
-        sessionHandler.postDelayed(sessionCheckRunnable, 10000); // bắt đầu sau 10 giây
+        sessionHandler.postDelayed(sessionCheckRunnable, 10000);
     }
 
     private void setupDummyData() {
-        // Clear existing data before adding new dummy data, important if setupDummyData is called multiple times
         featuredCoursesList.clear();
-        inProgressCoursesList.clear();
+//        inProgressCoursesList.clear();
         teacherList.clear();
 
-        // Dữ liệu mẫu cho Khóa học nổi bật - Đã cập nhật để bao gồm soBaiHoc
-
-
-        // Dữ liệu mẫu cho Giảng viên
         teacherList.add(new TeacherItem("Nguyễn Văn Nam", R.drawable.gv_ng_van_nam_portrait));
         teacherList.add(new TeacherItem("Nguyễn Tu Trung", R.drawable.gv_ng_tu_trung_portrait));
         teacherList.add(new TeacherItem("Nguyễn Thị Thu Hương", R.drawable.gv_ng_thi_thu_huong));
