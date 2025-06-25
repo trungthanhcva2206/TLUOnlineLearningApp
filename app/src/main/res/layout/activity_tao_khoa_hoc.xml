@@ -112,6 +112,22 @@
                     android:padding="12dp" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bộ môn"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"
+                android:textSize="16dp" />
+
+            <Spinner
+                android:id="@+id/spinner_bo_mon"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="12dp"
+                android:spinnerMode="dropdown" />
+
 
             <!-- Nút tạo khóa học -->
             <Button
@@ -123,7 +139,7 @@
                 android:backgroundTint="@color/blue"
                 android:textStyle="bold"
                 android:padding="12dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="32dp"
                 android:textSize="24sp" />
         </LinearLayout>
     </ScrollView>

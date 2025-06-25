@@ -6,9 +6,11 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,6 +36,8 @@ public class TaoKhoaHocActivity extends AppCompatActivity {
     private final List<BaiHoc> danhSachBaiHoc = new ArrayList<>();
     private static final int REQUEST_THEM_BAI_HOC = 1;
 
+    private Spinner spinner;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,6 +49,7 @@ public class TaoKhoaHocActivity extends AppCompatActivity {
         layoutMoTaKhoaHoc = findViewById(R.id.layout_mo_ta_khoa_hoc);
         btnTaoKhoaHoc = findViewById(R.id.btn_tao_khoa_hoc);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
+        Spinner spinnerBoMon = findViewById(R.id.spinner_bo_mon);
 
         ImageView btnBack = findViewById(R.id.btn_back);
         btnBack.setOnClickListener(v -> finish());
@@ -53,6 +58,8 @@ public class TaoKhoaHocActivity extends AppCompatActivity {
         btnTaoKhoaHoc.setOnClickListener(v -> {
             String tenKhoaHoc = edtTenKhoaHoc.getText().toString().trim();
             String moTaKhoaHoc = edtMoTaKhoaHoc.getText().toString().trim();
+
+            String boMon = spinnerBoMon.getSelectedItem().toString();
 
             boolean isValid = true;
             layoutTenKhoaHoc.setError(null);
@@ -66,10 +73,7 @@ public class TaoKhoaHocActivity extends AppCompatActivity {
                 layoutMoTaKhoaHoc.setError("Vui lòng nhập mô tả khóa học");
                 isValid = false;
             }
-            if (danhSachBaiHoc.isEmpty()) {
-                Toast.makeText(this, "Vui lòng thêm ít nhất 1 bài học", Toast.LENGTH_SHORT).show();
-                isValid = false;
-            }
+
 
             if (isValid) {
                 Intent resultIntent = new Intent();
@@ -120,6 +124,19 @@ public class TaoKhoaHocActivity extends AppCompatActivity {
                 return false;
             }
         });
+
+
+
+        String[] danhSachBoMon = {"Công nghệ phần mềm", "Tin học và Kỹ thuật tính toán", "Trí tuệ nhân tạo", "Hệ thống thông tin", "Mạng và an toàn thông tin","Toán học"};
+
+        ArrayAdapter<String> adapterBoMon = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_item,
+                danhSachBoMon
+        );
+        adapterBoMon.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerBoMon.setAdapter(adapterBoMon);
+
 
     }
 
