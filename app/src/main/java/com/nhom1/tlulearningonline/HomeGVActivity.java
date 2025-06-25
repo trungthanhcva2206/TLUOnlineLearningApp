@@ -40,6 +40,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.text.Editable;
+import android.text.TextWatcher;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 public class HomeGVActivity extends AppCompatActivity {
 
     private TextView tvGreeting, tvUserName;
@@ -49,8 +55,8 @@ public class HomeGVActivity extends AppCompatActivity {
 
     private RecyclerView recyclerFeaturedTopCoursesGV, recyclerMyCoursesGV;
 
-    private com.nhom1.tlulearningonline.adapters.FeaturedCoursesGVAdapter featuredCoursesGVAdapter;
-    private com.nhom1.tlulearningonline.adapters.MyCoursesGVAdapter myCoursesGVAdapter;
+    private com.nhom1.tlulearningonline.FeaturedCoursesGVAdapter featuredCoursesGVAdapter;
+    private com.nhom1.tlulearningonline.MyCoursesGVAdapter myCoursesGVAdapter;
     TextView tv_user_name;
     ImageView iv_avatar;
 
@@ -61,6 +67,11 @@ public class HomeGVActivity extends AppCompatActivity {
 
     private Handler sessionHandler;
     private Runnable sessionCheckRunnable;
+
+
+    private List<CourseItemGV> featuredCoursesGVListFull = new ArrayList<>(); // << Thêm danh sách này
+
+    private List<CourseItemGV> myCoursesGVListFull = new ArrayList<>(); // << Thêm danh sách này
 
 
     private void fetchUserInfo() {
@@ -145,8 +156,7 @@ public class HomeGVActivity extends AppCompatActivity {
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
-        // Setup dữ liệu mẫu
-        setupDummyData();
+
         fetchUserInfo();
         fetchCourses();// Uncomment để gọi API lấy thông tin giảng viên
         setupSessionCheck();
@@ -155,13 +165,13 @@ public class HomeGVActivity extends AppCompatActivity {
         updateStatistics();
 
         // Setup RecyclerView cho Khoá học nổi bật của tôi
-        featuredCoursesGVAdapter = new com.nhom1.tlulearningonline.adapters.FeaturedCoursesGVAdapter(featuredCoursesGVList);
+        featuredCoursesGVAdapter = new com.nhom1.tlulearningonline.FeaturedCoursesGVAdapter(featuredCoursesGVList);
         LinearLayoutManager featuredLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         recyclerFeaturedTopCoursesGV.setLayoutManager(featuredLayoutManager);
         recyclerFeaturedTopCoursesGV.setAdapter(featuredCoursesGVAdapter);
 
         // Setup RecyclerView cho Khoá học của tôi
-        myCoursesGVAdapter = new com.nhom1.tlulearningonline.adapters.MyCoursesGVAdapter(myCoursesGVList);
+        myCoursesGVAdapter = new com.nhom1.tlulearningonline.MyCoursesGVAdapter(myCoursesGVList);
         LinearLayoutManager myCoursesLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         recyclerMyCoursesGV.setLayoutManager(myCoursesLayoutManager);
         recyclerMyCoursesGV.setAdapter(myCoursesGVAdapter);
@@ -176,7 +186,8 @@ public class HomeGVActivity extends AppCompatActivity {
         edtSearch.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // Triển khai logic tìm kiếm ở đây
+                // Lọc cả hai danh sách
+                filterFeaturedCoursesGV(s.toString());
             }
             @Override public void afterTextChanged(Editable s) {}
         });
@@ -239,22 +250,18 @@ public class HomeGVActivity extends AppCompatActivity {
     /**
      * Tạo dữ liệu mẫu cho các danh sách khóa học nổi bật và khóa học của tôi.
      */
-    private void setupDummyData() {
-        featuredCoursesGVList.clear();
-        myCoursesGVList.clear();
 
-        featuredCoursesGVList.add(new CourseItemGV("Thiết kế và phát triển game",
-                "Môn Thiết kế và Phát triển Game sẽ hướng dẫn bạn từ ý tưởng đến sản phẩm game...", 15));
-        featuredCoursesGVList.add(new CourseItemGV("Trí tuệ nhân tạo nâng cao",
-                "Tiếp cận các thuật toán AI phức tạp và ứng dụng thực tế.", 25));
-
-        myCoursesGVList.add(new CourseItemGV("Thuật toán ứng dụng",
-                "Môn Thuật toán Ứng dụng trang bị cho bạn kiến thức và kỹ năng xây dựng giải pháp hiệu quả cho các bài toán thực tế.", 15));
-        myCoursesGVList.add(new CourseItemGV("Công nghệ đa phương tiện",
-                "Chuyên đề về công nghệ đa phương tiện là cơ hội để bạn cập nhật những lĩnh vực công nghệ thông tin mới nhất.", 20));
-        myCoursesGVList.add(new CourseItemGV("Hệ thống thông tin quản lý",
-                "Tìm hiểu về cách xây dựng và quản lý các hệ thống thông tin trong tổ chức.", 18));
+    // --- THÊM CÁC PHƯƠNG THỨC LỌC ---
+    private void filterFeaturedCoursesGV(String text) {
+        List<CourseItemGV> filteredList = new ArrayList<>();
+        for (CourseItemGV item : featuredCoursesGVListFull) {
+            if (item.getTitle().toLowerCase().contains(text.toLowerCase())) {
+                filteredList.add(item);
+            }
+        }
+        featuredCoursesGVAdapter.filterList(filteredList);
     }
+
 
     private void fetchCourses() {
         SessionManager sm = new SessionManager(this);
@@ -288,6 +295,8 @@ public class HomeGVActivity extends AppCompatActivity {
                                         // Xoá danh sách cũ
                                         featuredCoursesGVList.clear();
                                         myCoursesGVList.clear();
+                                        featuredCoursesGVListFull.clear(); // << Xóa
+                                        myCoursesGVListFull.clear();
 
                                         // 3. Lặp qua tất cả các khóa học
                                         for (int i = 0; i < coursesArr.length(); i++) {
@@ -297,16 +306,20 @@ public class HomeGVActivity extends AppCompatActivity {
                                             String title  = c.getString("title");
                                             String desc   = c.getString("description");
                                             String tId    = c.getString("teacherId");
+                                            String teacherName = c.optString("teacherName", "Giảng viên");
+                                            if (teacherName.equals("null") || teacherName.isEmpty()) {
+                                                teacherName = "Giảng viên";
+                                            }
                                             int count     = lessonCountMap.getOrDefault(id, 0);
 
-                                            CourseItemGV item = new CourseItemGV(title, desc, count);
+                                            CourseItemGV item = new CourseItemGV(id,title, desc, count,teacherName);
 
-                                            // ✅ Thêm vào danh sách featured (tất cả các khóa học)
                                             featuredCoursesGVList.add(item);
+                                            featuredCoursesGVListFull.add(item);
 
-                                            // ✅ Nếu là của giảng viên hiện tại thì thêm vào danh sách của tôi
                                             if (userId.equals(tId)) {
                                                 myCoursesGVList.add(item);
+                                                myCoursesGVListFull.add(item);
                                             }
                                         }
 

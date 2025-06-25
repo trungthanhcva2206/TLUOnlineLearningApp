@@ -11,6 +11,7 @@ public class CourseItem {
     private String department;
     private int soBaiHoc;
     private String des;
+    private boolean isRegistered;
 
     /**
      * Constructs a new CourseItem with full parameters.
@@ -56,5 +57,12 @@ public class CourseItem {
 
     public int getSoBaiHoc() {
         return soBaiHoc;
+    }
+    public boolean isRegistered() {
+        return isRegistered;
+    }
+
+    public void setRegistered(boolean registered) {
+        isRegistered = registered;
     }
 }

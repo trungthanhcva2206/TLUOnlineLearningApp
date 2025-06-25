@@ -6,11 +6,14 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -42,8 +45,10 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
     private static final int REQUEST_SUA_KHOA_HOC = 200;
 
     private LinearLayout layoutDsKhoaHoc;
-    private final ArrayList<KhoaHoc> danhSach = new ArrayList<>();
+    private final ArrayList<KhoaHoc> danhSachDayDu = new ArrayList<>();
     private int viTriDangSua = -1;
+
+    private EditText edtTimKiem;
     TextView tv_ten_nguoi_dung;
     ImageView iv_avatar;
 
@@ -112,6 +117,11 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        loadKhoaHocFromApi();
+    }
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quan_ly_khoa_hoc);
@@ -119,7 +129,8 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
         // Initialize bottomNavigationView here
         tv_ten_nguoi_dung = findViewById(R.id.tv_ten_nguoi_dung);
         iv_avatar = findViewById(R.id.iv_avatar);
-        bottomNavigationView = findViewById(R.id.bottom_navigation); // Add this line
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
+        edtTimKiem = findViewById(R.id.edt_tim_kiem);
 
         layoutDsKhoaHoc = findViewById(R.id.layout_ds_khoa_hoc);
         Button btnTaoKhoaHoc = findViewById(R.id.btn_tao_khoa_hoc);
@@ -130,9 +141,27 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
         // Dữ liệu mẫu
         loadKhoaHocFromApi();
 
+        iv_avatar.setOnClickListener(v -> {
+            Intent intent = new Intent(QuanLyKhoaHocActivity.this, UserProfileActivity.class);
+            startActivity(intent);
+        });
+
         btnTaoKhoaHoc.setOnClickListener(v -> {
             Intent intent = new Intent(QuanLyKhoaHocActivity.this, TaoKhoaHocActivity.class);
             startActivityForResult(intent, REQUEST_TAO_KHOA_HOC);
+        });
+
+        edtTimKiem.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // THAY ĐỔI LOGIC: Gọi hàm tìm kiếm
+                timKiemKhoaHoc(s.toString());
+            }
+            @Override
+            public void afterTextChanged(Editable s) {}
         });
 
         // --- XỬ LÝ THANH ĐIỀU HƯỚNG DƯỚI CÙNG ---
@@ -160,7 +189,35 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
         bottomNavigationView.setSelectedItemId(R.id.nav_courses);
     }
 
-    private void addKhoaHocToLayout(KhoaHoc kh, int position) {
+    // MỚI: Hàm tìm kiếm theo logic của XemKhoaHocActivity
+    private void timKiemKhoaHoc(String tuKhoa) {
+        ArrayList<KhoaHoc> danhSachDaLoc = new ArrayList<>();
+        String lowerCaseTuKhoa = tuKhoa.toLowerCase();
+
+        if (tuKhoa.isEmpty()) {
+            danhSachDaLoc.addAll(danhSachDayDu);
+        } else {
+            for (KhoaHoc kh : danhSachDayDu) {
+                if (kh.ten.toLowerCase().contains(lowerCaseTuKhoa) || kh.moTa.toLowerCase().contains(lowerCaseTuKhoa)) {
+                    danhSachDaLoc.add(kh);
+                }
+            }
+        }
+        // Gọi hàm hiển thị với danh sách đã lọc
+        hienThiDanhSach(danhSachDaLoc);
+    }
+
+    // MỚI: Hàm hiển thị theo logic của XemKhoaHocActivity
+    private void hienThiDanhSach(ArrayList<KhoaHoc> danhSachCanHienThi) {
+        layoutDsKhoaHoc.removeAllViews();
+        for (int i = 0; i < danhSachCanHienThi.size(); i++) {
+            View itemView = createKhoaHocView(danhSachCanHienThi.get(i), i);
+            layoutDsKhoaHoc.addView(itemView);
+        }
+    }
+
+    // Đổi tên từ addKhoaHocToLayout thành createKhoaHocView để logic rõ ràng hơn
+    private View createKhoaHocView(KhoaHoc kh, int position) {
         View itemView = LayoutInflater.from(this).inflate(R.layout.item_khoa_hoc, layoutDsKhoaHoc, false);
         CardView cardView = (CardView) itemView;
 
@@ -169,30 +226,27 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
 
         CustomViewBinder.bind(itemView, kh);
 
-        ImageView btnView = itemView.findViewById(R.id.btn_view);
         ImageView btnEdit = itemView.findViewById(R.id.btn_edit);
-        btnView.setTag(false);
 
-        btnView.setOnClickListener(v -> showConfirmationDialog(itemView, btnView, btnEdit));
 
         btnEdit.setOnClickListener(v -> {
+            viTriDangSua = position;
             Intent intent = new Intent(QuanLyKhoaHocActivity.this, SuaKhoaHocActivity.class);
             intent.putExtra("course_id", kh.id); // truyền id
-            startActivity(intent);
+            startActivityForResult(intent, REQUEST_SUA_KHOA_HOC);
         });
-
 
         itemView.setOnClickListener(v -> {
             Intent intent = new Intent(QuanLyKhoaHocActivity.this, ChiTietKhoaHocActivity.class);
+            intent.putExtra("course_id", kh.id);
             intent.putExtra("tieu_de", kh.ten);
-            intent.putExtra("mo_ta", kh.moTa);
-            intent.putExtra("tac_gia", "GV. Nguyễn Văn A");
+            intent.putExtra("des", kh.moTa);
+            intent.putExtra("tac_gia", kh.tenGV);
             intent.putExtra("so_bai", kh.dsBaiHoc.size());
-            intent.putStringArrayListExtra("ds_bai_hoc", kh.dsBaiHoc);
             startActivity(intent);
         });
 
-        layoutDsKhoaHoc.addView(itemView);
+        return itemView;
     }
 
     // --- PHIÊN BẢN ĐÃ SỬA LỖI VÀ TỐI ƯU ---
@@ -270,16 +324,8 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
                 KhoaHoc khoaHocMoi = new KhoaHoc("0", ten, moTa, "GV. Nguyễn Văn A", dsBaiHoc);
                 danhSach.add(khoaHocMoi);
                 addKhoaHocToLayout(khoaHocMoi, danhSach.size() - 1);
-            } else if (requestCode == REQUEST_SUA_KHOA_HOC && viTriDangSua != -1) {
-                KhoaHoc khoaHoc = danhSach.get(viTriDangSua);
-                khoaHoc.ten = ten;
-                khoaHoc.moTa = moTa;
-                khoaHoc.dsBaiHoc = dsBaiHoc;
-                layoutDsKhoaHoc.removeAllViews();
-                for (int i = 0; i < danhSach.size(); i++) {
-                    addKhoaHocToLayout(danhSach.get(i), i);
-                }
-                viTriDangSua = -1;
+            } else if (requestCode == REQUEST_SUA_KHOA_HOC && data.getBooleanExtra("course_updated", false)) {
+                loadKhoaHocFromApi();
             }
         }
     }
@@ -316,7 +362,7 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
         }
 
         // B1: Lấy toàn bộ lessons
-        StringRequest lessonRequest = new StringRequest(Request.Method.GET, urlLessons,
+        Utf8StringRequest  lessonRequest = new Utf8StringRequest (Request.Method.GET, urlLessons,
                 response -> {
                     try {
                         HashMap<String, ArrayList<String>> lessonsMap = new HashMap<>();
@@ -329,10 +375,10 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
                         }
 
                         // B2: Lấy danh sách khóa học
-                        StringRequest courseRequest = new StringRequest(Request.Method.GET, urlCourses,
+                        Utf8StringRequest  courseRequest = new Utf8StringRequest (Request.Method.GET, urlCourses,
                                 courseResponse -> {
                                     try {
-                                        danhSach.clear();
+                                        danhSachDayDu.clear();
                                         layoutDsKhoaHoc.removeAllViews();
 
                                         org.json.JSONArray courseArray = new org.json.JSONArray(courseResponse);
@@ -340,7 +386,6 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
                                             JSONObject obj = courseArray.getJSONObject(i);
                                             String teacherId = obj.getString("teacherId");
 
-                                            // ❗❗❗ CHỈ LẤY CÁC KHÓA CỦA GIẢNG VIÊN ĐANG ĐĂNG NHẬP
                                             if (!userId.equals(teacherId)) continue;
 
                                             String id = obj.getString("id");
@@ -351,9 +396,10 @@ public class QuanLyKhoaHocActivity extends AppCompatActivity {
                                             ArrayList<String> lessons = lessonsMap.getOrDefault(id, new ArrayList<>());
 
                                             KhoaHoc kh = new KhoaHoc(id, title, description, teacher, lessons);
-                                            danhSach.add(kh);
-                                            addKhoaHocToLayout(kh, danhSach.size() - 1);
+                                            danhSachDayDu.add(kh);
                                         }
+                                        // THAY ĐỔI LOGIC: Hiển thị toàn bộ danh sách ban đầu
+                                        hienThiDanhSach(danhSachDayDu);
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                         Toast.makeText(this, "Lỗi xử lý dữ liệu khóa học!", Toast.LENGTH_SHORT).show();

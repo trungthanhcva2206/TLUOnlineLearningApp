@@ -34,6 +34,10 @@ public class SuaKhoaHocActivity extends AppCompatActivity {
     private LinearLayout layoutDanhSachBaiHoc;
     private  BottomNavigationView bottomNavigationView;
     private String courseId;
+    private String oldThumbnailUrl;
+    private String oldStatus;
+    private String oldDepartmentId;
+    private String oldTeacherId;
 
     private final List<BaiHoc> danhSachBaiHoc = new ArrayList<>();
     private static final int REQUEST_THEM_BAI_HOC = 1;
@@ -43,11 +47,6 @@ public class SuaKhoaHocActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sua_khoa_hoc);
-        courseId = getIntent().getStringExtra("course_id");
-        if (courseId != null) {
-            Log.d("SuaKhoaHoc", "Course ID: " + courseId);
-            fetchCourseDetail(courseId); // ⬅ Gọi API ở bước 2
-        }
 
         edtTenKhoaHoc = findViewById(R.id.edt_ten_khoa_hoc);
         edtMoTaKhoaHoc = findViewById(R.id.edt_mo_ta_khoa_hoc);
@@ -57,6 +56,13 @@ public class SuaKhoaHocActivity extends AppCompatActivity {
         btnCapNhatKhoaHoc = findViewById(R.id.btn_sua_khoa_hoc);
         layoutDanhSachBaiHoc = findViewById(R.id.layout_danh_sach_bai_hoc);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
+
+        courseId = getIntent().getStringExtra("course_id");
+        if (courseId != null) {
+            Log.d("SuaKhoaHoc", "Course ID: " + courseId);
+            fetchCourseDetail(courseId);
+            fetchLessonsByCourseId(courseId);
+        }
 
         ImageView btnBack = findViewById(R.id.btn_back);
         btnBack.setOnClickListener(v -> finish());
@@ -73,7 +79,7 @@ public class SuaKhoaHocActivity extends AppCompatActivity {
         // Hiển thị danh sách bài học (nếu có)
         if (dsBaiHoc != null) {
             for (String tieuDe : dsBaiHoc) {
-                BaiHoc bh = new BaiHoc(tieuDe, "", "");
+                BaiHoc bh = new BaiHoc("",tieuDe, "", "");
                 danhSachBaiHoc.add(bh);
                 addBaiHocToLayout(bh);
             }
@@ -116,18 +122,7 @@ public class SuaKhoaHocActivity extends AppCompatActivity {
             }
 
             if (isValid) {
-                Intent resultIntent = new Intent();
-                resultIntent.putExtra("tenKhoaHoc", tenKhoaHoc);
-                resultIntent.putExtra("moTaKhoaHoc", moTaKhoaHoc);
-
-                ArrayList<String> dsTenBaiHoc = new ArrayList<>();
-                for (BaiHoc bh : danhSachBaiHoc) {
-                    dsTenBaiHoc.add(bh.ten);
-                }
-
-                resultIntent.putStringArrayListExtra("ds_bai_hoc", dsTenBaiHoc);
-                setResult(RESULT_OK, resultIntent);
-                finish();
+                capNhatKhoaHocAPI(courseId, tenKhoaHoc, moTaKhoaHoc);
             }
         });
 
@@ -174,7 +169,7 @@ public class SuaKhoaHocActivity extends AppCompatActivity {
             String videoUri = data.getStringExtra("videoUri");
             String taiLieu = data.getStringExtra("tenTaiLieu");
 
-            BaiHoc baiHoc = new BaiHoc(tenBaiHoc, videoUri, taiLieu);
+            BaiHoc baiHoc = new BaiHoc("",tenBaiHoc, videoUri, taiLieu);
             danhSachBaiHoc.add(baiHoc);
             addBaiHocToLayout(baiHoc);
         }
@@ -186,13 +181,21 @@ public class SuaKhoaHocActivity extends AppCompatActivity {
         ImageView btnXoa = view.findViewById(R.id.btnXoaBaiHoc);
 
         tvTenBaiHoc.setText("- " + baiHoc.ten);
+
         btnXoa.setOnClickListener(v -> {
-            layoutDanhSachBaiHoc.removeView(view);
-            danhSachBaiHoc.remove(baiHoc);
+            if (baiHoc.id != null && !baiHoc.id.isEmpty()) {
+                xoaBaiHocAPI(baiHoc.id, () -> {
+                    fetchLessonsByCourseId(courseId); // Tải lại danh sách
+                });
+            } else {
+                layoutDanhSachBaiHoc.removeView(view);
+                danhSachBaiHoc.remove(baiHoc);
+            }
         });
 
         layoutDanhSachBaiHoc.addView(view);
     }
+
 
     private void fetchCourseDetail(String courseId) {
         String url = "http://14.225.207.221:6060/mobile/courses/" + courseId;
@@ -207,6 +210,10 @@ public class SuaKhoaHocActivity extends AppCompatActivity {
 
                         String ten = obj.getString("title");
                         String moTa = obj.getString("description");
+                        oldThumbnailUrl = obj.getString("thumbnailUrl");
+                        oldStatus = obj.getString("status");
+                        oldDepartmentId = obj.getString("departmentId");
+                        oldTeacherId = obj.getString("teacherId");
 
                         // Cập nhật giao diện
                         edtTenKhoaHoc.setText(ten);
@@ -229,14 +236,122 @@ public class SuaKhoaHocActivity extends AppCompatActivity {
 
 
     private static class BaiHoc {
+        String id;
         String ten;
         String videoUri;
         String taiLieu;
 
-        public BaiHoc(String ten, String videoUri, String taiLieu) {
+        public BaiHoc(String id, String ten, String videoUri, String taiLieu) {
+            this.id = id;
             this.ten = ten;
             this.videoUri = videoUri;
             this.taiLieu = taiLieu;
         }
     }
+
+    private void fetchLessonsByCourseId(String courseId) {
+        String url = "http://14.225.207.221:6060/mobile/lessons";
+
+        danhSachBaiHoc.clear();
+        layoutDanhSachBaiHoc.removeAllViews();
+
+        com.android.volley.RequestQueue queue = com.android.volley.toolbox.Volley.newRequestQueue(this);
+        com.android.volley.toolbox.StringRequest request = new com.android.volley.toolbox.StringRequest(
+                com.android.volley.Request.Method.GET,
+                url,
+                response -> {
+                    try {
+                        org.json.JSONArray arr = new org.json.JSONArray(response);
+                        for (int i = 0; i < arr.length(); i++) {
+                            org.json.JSONObject obj = arr.getJSONObject(i);
+                            String idKhoaHoc = obj.getString("courseId");
+
+                            if (idKhoaHoc.equals(courseId)) {
+                                String id = obj.getString("id");
+                                String title = obj.getString("title");
+                                String content = obj.getString("content");
+
+                                BaiHoc bh = new BaiHoc(id, title, "", content);
+                                danhSachBaiHoc.add(bh);
+                                addBaiHocToLayout(bh);
+                            }
+                        }
+
+                        if (danhSachBaiHoc.isEmpty()) {
+                            Toast.makeText(this, "Chưa có bài học nào cho khóa học này", Toast.LENGTH_SHORT).show();
+                        }
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Toast.makeText(this, "Lỗi xử lý danh sách bài học", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                error -> {
+                    error.printStackTrace();
+                    Toast.makeText(this, "Lỗi tải danh sách bài học!", Toast.LENGTH_SHORT).show();
+                }
+        );
+
+        queue.add(request);
+    }
+
+    private void xoaBaiHocAPI(String lessonId, Runnable onSuccess) {
+        String url = "http://14.225.207.221:6060/mobile/lessons/" + lessonId;
+
+        com.android.volley.RequestQueue queue = com.android.volley.toolbox.Volley.newRequestQueue(this);
+        com.android.volley.toolbox.StringRequest request = new com.android.volley.toolbox.StringRequest(
+                com.android.volley.Request.Method.DELETE,
+                url,
+                response -> {
+                    Toast.makeText(this, "Xóa bài học thành công", Toast.LENGTH_SHORT).show();
+                    onSuccess.run();
+                },
+                error -> {
+                    error.printStackTrace();
+                    Toast.makeText(this, "Xóa bài học thất bại!", Toast.LENGTH_SHORT).show();
+                }
+        );
+
+        queue.add(request);
+    }
+    private void capNhatKhoaHocAPI(String id, String title, String description) {
+        String url = "http://14.225.207.221:6060/mobile/courses/" + id;
+
+        org.json.JSONObject body = new org.json.JSONObject();
+        try {
+            body.put("title", title);
+            body.put("description", description);
+            body.put("thumbnailUrl", oldThumbnailUrl);
+            body.put("status", oldStatus);
+            body.put("departmentId", oldDepartmentId);
+            body.put("teacherId", oldTeacherId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Lỗi tạo dữ liệu cập nhật", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        com.android.volley.RequestQueue queue = com.android.volley.toolbox.Volley.newRequestQueue(this);
+        com.android.volley.toolbox.JsonObjectRequest request = new com.android.volley.toolbox.JsonObjectRequest(
+                com.android.volley.Request.Method.PUT,
+                url,
+                body,
+                response -> {
+                    Toast.makeText(this, "Cập nhật khóa học thành công", Toast.LENGTH_SHORT).show();
+                    Intent resultIntent = new Intent();
+                    resultIntent.putExtra("course_updated", true);
+                    setResult(RESULT_OK, resultIntent);
+                    finish();
+                },
+                error -> {
+                    error.printStackTrace();
+                    Toast.makeText(this, "Lỗi cập nhật khóa học", Toast.LENGTH_SHORT).show();
+                }
+        );
+
+        queue.add(request);
+    }
+
+
+
 }

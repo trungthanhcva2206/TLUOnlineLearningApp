@@ -1,4 +1,4 @@
-package com.nhom1.tlulearningonline.adapters;
+package com.nhom1.tlulearningonline;
 
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -42,28 +42,31 @@ public class MyCoursesGVAdapter extends RecyclerView.Adapter<MyCoursesGVAdapter.
         holder.tvDescription.setText(course.getDescription());
         holder.btnLessonCount.setText(course.getLessonCount() + " bài học");
 
-        // Bind và xử lý sự kiện cho các nút Edit và View
         holder.btnEdit.setOnClickListener(v -> {
             Toast.makeText(v.getContext(), "Chỉnh sửa khóa học: " + course.getTitle(), Toast.LENGTH_SHORT).show();
-            // TODO: Mở SuaKhoaHocActivity với dữ liệu của khóa học này
             Intent intent = new Intent(v.getContext(), SuaKhoaHocActivity.class);
-            // Truyền dữ liệu khóa học qua intent nếu cần
+            // Truyền dữ liệu khóa học nếu cần
+            intent.putExtra("course_id", course.getId());
             v.getContext().startActivity(intent);
         });
 
         holder.btnView.setOnClickListener(v -> {
-            Toast.makeText(v.getContext(), "Xem chi tiết khóa học: " + course.getTitle(), Toast.LENGTH_SHORT).show();
-            // TODO: Mở ChiTietKhoaHocActivity với dữ liệu của khóa học này
-            Intent intent = new Intent(v.getContext(), ChiTietKhoaHocActivity.class); // Hoặc một activity chi tiết GV riêng
-            // Truyền dữ liệu khóa học qua intent nếu cần
-            // Ví dụ: intent.putExtra("tieu_de", course.getTitle());
+            Intent intent = new Intent(v.getContext(), ChiTietKhoaHocActivity.class);
+            intent.putExtra("course_id", course.getId());
+            intent.putExtra("tieu_de", course.getTitle());
+            intent.putExtra("des", course.getDescription());
+            intent.putExtra("tac_gia", course.getTeacherName()); // nếu có
+            intent.putExtra("so_bai", course.getLessonCount());
             v.getContext().startActivity(intent);
         });
 
         holder.itemView.setOnClickListener(v -> {
-            Toast.makeText(v.getContext(), "Mở khóa học: " + course.getTitle(), Toast.LENGTH_SHORT).show();
-            // Intent để mở ChiTietKhoaHocActivity
-            Intent intent = new Intent(v.getContext(), ChiTietKhoaHocActivity.class); // Hoặc một activity chi tiết GV riêng
+            Intent intent = new Intent(v.getContext(), ChiTietKhoaHocActivity.class);
+            intent.putExtra("course_id", course.getId());
+            intent.putExtra("tieu_de", course.getTitle());
+            intent.putExtra("des", course.getDescription());
+            intent.putExtra("tac_gia", course.getTeacherName());
+            intent.putExtra("so_bai", course.getLessonCount());
             v.getContext().startActivity(intent);
         });
     }
@@ -86,5 +89,10 @@ public class MyCoursesGVAdapter extends RecyclerView.Adapter<MyCoursesGVAdapter.
             btnEdit = itemView.findViewById(R.id.btn_edit_gv); // Tìm kiếm nút edit
             btnView = itemView.findViewById(R.id.btn_view_gv);   // Tìm kiếm nút view
         }
+    }
+    // Trong file FeaturedCoursesGVAdapter.java và MyCoursesGVAdapter.java
+    public void filterList(List<CourseItemGV> filteredList) {
+        this.courseList = filteredList;
+        notifyDataSetChanged();
     }
 }
