@@ -4,17 +4,26 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.android.volley.Request;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.textfield.TextInputLayout;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +35,14 @@ public class TaoKhoaHocActivity extends AppCompatActivity {
     private Button btnThemBaiHoc, btnTaoKhoaHoc;
     private LinearLayout layoutDanhSachBaiHoc;
 
+    private BottomNavigationView bottomNavigationView;
+
     private final List<BaiHoc> danhSachBaiHoc = new ArrayList<>();
     private static final int REQUEST_THEM_BAI_HOC = 1;
+
+    private Spinner spinnerBoMon;
+    private List<Department> departments = new ArrayList<>();
+    private ArrayAdapter<Department> departmentAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,21 +53,20 @@ public class TaoKhoaHocActivity extends AppCompatActivity {
         edtMoTaKhoaHoc = findViewById(R.id.edt_mo_ta_khoa_hoc);
         layoutTenKhoaHoc = findViewById(R.id.layout_ten_khoa_hoc);
         layoutMoTaKhoaHoc = findViewById(R.id.layout_mo_ta_khoa_hoc);
-        btnThemBaiHoc = findViewById(R.id.btn_them_bai_hoc);
         btnTaoKhoaHoc = findViewById(R.id.btn_tao_khoa_hoc);
-        layoutDanhSachBaiHoc = findViewById(R.id.layout_danh_sach_bai_hoc);
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
+        spinnerBoMon = findViewById(R.id.spinner_bo_mon);
 
         ImageView btnBack = findViewById(R.id.btn_back);
         btnBack.setOnClickListener(v -> finish());
 
-        btnThemBaiHoc.setOnClickListener(v -> {
-            Intent intent = new Intent(TaoKhoaHocActivity.this, ThemBaiHocActivity.class);
-            startActivityForResult(intent, REQUEST_THEM_BAI_HOC);
-        });
 
         btnTaoKhoaHoc.setOnClickListener(v -> {
             String tenKhoaHoc = edtTenKhoaHoc.getText().toString().trim();
             String moTaKhoaHoc = edtMoTaKhoaHoc.getText().toString().trim();
+
+            Department selectedDepartment = (Department) spinnerBoMon.getSelectedItem();
+            String departmentId = selectedDepartment.getId();
 
             boolean isValid = true;
             layoutTenKhoaHoc.setError(null);
@@ -66,27 +80,62 @@ public class TaoKhoaHocActivity extends AppCompatActivity {
                 layoutMoTaKhoaHoc.setError("Vui lòng nhập mô tả khóa học");
                 isValid = false;
             }
-            if (danhSachBaiHoc.isEmpty()) {
-                Toast.makeText(this, "Vui lòng thêm ít nhất 1 bài học", Toast.LENGTH_SHORT).show();
-                isValid = false;
-            }
 
             if (isValid) {
-                Intent resultIntent = new Intent();
-                resultIntent.putExtra("tenKhoaHoc", tenKhoaHoc);
-                resultIntent.putExtra("moTaKhoaHoc", moTaKhoaHoc);
-
-                // Truyền danh sách tên bài học
-                ArrayList<String> tenBaiHocList = new ArrayList<>();
-                for (BaiHoc bh : danhSachBaiHoc) {
-                    tenBaiHocList.add(bh.ten);
-                }
-                resultIntent.putStringArrayListExtra("ds_bai_hoc", tenBaiHocList);
-
-                setResult(RESULT_OK, resultIntent);
-                finish();
+                // Gọi hàm tạo khóa học qua API
+                taoKhoaHoc(tenKhoaHoc, moTaKhoaHoc, departmentId);
             }
         });
+
+
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                int itemId = item.getItemId();
+                if (itemId == R.id.nav_home) {
+                    Intent intent = new Intent(TaoKhoaHocActivity.this, HomeGVActivity.class); // Assuming student home is default
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                    // finish(); // Remove finish() here unless you explicitly want to remove the current activity from stack
+                    return true;
+                } else if (itemId == R.id.nav_forum) {
+                    Intent intent = new Intent(TaoKhoaHocActivity.this, GroupChatActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                    // finish();
+                    return true;
+                } else if (itemId == R.id.nav_courses) {
+                    Intent intent = SessionManager.getCoursesActivityIntent(TaoKhoaHocActivity.this); // Use helper
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                    // finish();
+                    return true;
+                } else if (itemId == R.id.nav_profile) {
+                    Intent intent = new Intent(TaoKhoaHocActivity.this, UserProfileActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                    // finish();
+                    return true;
+                }
+                return false;
+            }
+        });
+
+
+
+        spinnerBoMon = findViewById(R.id.spinner_bo_mon);
+
+        departmentAdapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_item,
+                departments
+        );
+        departmentAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerBoMon.setAdapter(departmentAdapter);
+
+        loadDepartmentsFromAPI();
+
+
     }
 
     @Override
@@ -128,4 +177,72 @@ public class TaoKhoaHocActivity extends AppCompatActivity {
             this.taiLieu = taiLieu;
         }
     }
+
+    private void loadDepartmentsFromAPI() {
+        String url = "http://14.225.207.221:6060/mobile/departments";
+
+        JsonArrayRequest request = new JsonArrayRequest(
+                Request.Method.GET,
+                url,
+                null,
+                response -> {
+                    departments.clear();
+                    for (int i = 0; i < response.length(); i++) {
+                        try {
+                            JSONObject obj = response.getJSONObject(i);
+                            String id = obj.getString("id");
+                            String name = obj.getString("name");
+                            departments.add(new Department(id, name));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    departmentAdapter.notifyDataSetChanged();
+                },
+                error -> {
+                    Toast.makeText(this, "Lỗi tải danh sách bộ môn", Toast.LENGTH_SHORT).show();
+                }
+        );
+
+        VolleySingleton.getInstance(this).addToRequestQueue(request);
+    }
+
+    private void taoKhoaHoc(String tenKhoaHoc, String moTaKhoaHoc, String departmentId) {
+        String url = "http://14.225.207.221:6060/mobile/courses";
+
+        SessionManager sessionManager = new SessionManager(this);
+        String teacherId = sessionManager.getUserId();
+
+        JSONObject body = new JSONObject();
+        try {
+            body.put("title", tenKhoaHoc);
+            body.put("description", moTaKhoaHoc);
+            body.put("departmentId", departmentId);
+            body.put("teacherId", teacherId);
+            body.put("status", "ACTIVE");
+            // Không gửi thumbnailUrl nếu không cần
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Lỗi tạo JSON", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        com.android.volley.toolbox.JsonObjectRequest request = new com.android.volley.toolbox.JsonObjectRequest(
+                Request.Method.POST,
+                url,
+                body,
+                response -> {
+                    Toast.makeText(this, "Tạo khóa học thành công!", Toast.LENGTH_SHORT).show();
+                    finish(); // Quay về sau khi tạo xong
+                },
+                error -> {
+                    Toast.makeText(this, "Tạo khóa học thất bại!", Toast.LENGTH_SHORT).show();
+                    error.printStackTrace();
+                }
+        );
+
+        VolleySingleton.getInstance(this).addToRequestQueue(request);
+    }
+
+
 }

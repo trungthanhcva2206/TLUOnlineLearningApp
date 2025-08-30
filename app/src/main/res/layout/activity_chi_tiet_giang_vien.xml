@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/white"
+    >
+
+    <!-- App bar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        android:elevation="4dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:gravity="center_vertical">
+
+            <!-- Nút quay lại -->
+            <ImageView
+                android:id="@+id/btn_back"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_arrow_back"
+                app:tint="@color/blue"
+                android:contentDescription="Quay lại" />
+
+            <!-- Spacer -->
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"/>
+
+            <!-- Notification + Avatar -->
+            <ImageView
+
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_bell"
+                app:tint="@color/blue"
+                android:layout_marginEnd="12dp" />
+
+            <ImageView
+                android:id="@+id/iv_avatar"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_avatar"
+                android:background="@drawable/bg_avatar_circle"
+                android:scaleType="centerCrop" />
+        </LinearLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Nội dung -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="80dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+
+            <!-- Ảnh giảng viên -->
+            <ImageView
+                android:id="@+id/img_giang_vien"
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:src="@drawable/ic_avatar"
+                android:background="@drawable/bg_avatar_circle"
+                android:scaleType="centerCrop"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Tên giảng viên -->
+            <TextView
+                android:id="@+id/tv_ten_gv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nguyễn Văn Nam"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/blue" />
+
+            <!-- Bộ môn -->
+            <TextView
+                android:id="@+id/tv_bo_mon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Đại học Thuỷ Lợi"
+                android:textSize="14sp"
+                android:textColor="@color/blue"
+                android:background="@drawable/bg_filter_chip"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="4dp"
+                android:layout_marginTop="4dp"/>
+
+            <!-- Email -->
+            <TextView
+                android:id="@+id/tv_email"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="namnv@tlu.edu.vn"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- Danh sách khóa học -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_khoa_hoc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                tools:listitem="@layout/item_khoa_hoc_trang_chu" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Thanh điều hướng -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        app:menu="@menu/bottom_nav_menu"
+        app:itemIconTint="@color/blue"
+        app:itemTextColor="@color/blue"
+        android:background="#FFFFFF" />
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

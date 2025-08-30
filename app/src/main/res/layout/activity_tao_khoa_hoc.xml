@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+
     android:background="#FFFFFF">
 
     <!-- Header -->
@@ -111,41 +112,22 @@
                     android:padding="12dp" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Danh sách bài học -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Danh sách bài học"
-                android:layout_marginTop="24dp"
+                android:text="Bộ môn"
                 android:textStyle="bold"
+                android:layout_marginTop="16dp"
                 android:textSize="16dp" />
 
-            <!-- Vùng hiển thị giống EditText để chứa danh sách bài học -->
-            <LinearLayout
-                android:id="@+id/layout_danh_sach_bai_hoc"
+            <Spinner
+                android:id="@+id/spinner_bo_mon"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@drawable/bg_edit_text"
-                android:padding="12dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="12dp"
-                android:minHeight="100dp" />
+                android:spinnerMode="dropdown" />
 
-            <!-- Nút thêm bài học -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_them_bai_hoc"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="+ Thêm bài học"
-                android:textStyle="bold"
-                android:textSize="16dp"
-                android:textColor="@color/blue"
-                android:layout_marginBottom="24dp"
-                app:cornerRadius="8dp"
-                app:strokeWidth="2dp"
-                app:strokeColor="@color/blue"
-                android:backgroundTint="@android:color/white" />
 
             <!-- Nút tạo khóa học -->
             <Button
@@ -157,7 +139,7 @@
                 android:backgroundTint="@color/blue"
                 android:textStyle="bold"
                 android:padding="12dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="32dp"
                 android:textSize="24sp" />
         </LinearLayout>
     </ScrollView>

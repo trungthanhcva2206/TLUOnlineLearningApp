@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+
     android:background="#FFFFFF">
 
     <!-- Header -->
@@ -85,101 +86,50 @@
                     android:padding="12dp" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Video bài giảng -->
+            <!-- Mô tả bài học -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Video bài giảng "
+                android:text="Mô tả bài học"
                 android:textStyle="bold"
-                android:textSize="16dp" />
+                android:textSize="16sp"
+                android:layout_marginTop="8dp" />
 
-            <LinearLayout
-                android:id="@+id/box_video"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layout_mo_ta_bai_hoc"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
-                android:background="@drawable/bg_edit_text"
-                android:orientation="vertical"
-                android:padding="12dp">
+                android:layout_marginBottom="16dp"
+                app:errorEnabled="true">
 
-                <!-- Các thẻ video sẽ được thêm vào đây -->
-                <LinearLayout
-                    android:id="@+id/layout_ds_video"
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edt_mo_ta_bai_hoc"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical" />
+                    android:hint="Nhập mô tả bài học"
+                    android:minLines="3"
+                    android:maxLines="6"
+                    android:gravity="top"
+                    android:textSize="16sp"
+                    android:padding="12dp" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-            </LinearLayout>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_them_video"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="+ Thêm video"
-                android:textStyle="bold"
-                android:textSize="16dp"
-                android:textColor="@color/blue"
-                android:layout_marginBottom="24dp"
-                app:cornerRadius="8dp"
-                app:strokeWidth="2dp"
-                app:strokeColor="@color/blue"
-                android:backgroundTint="@android:color/white" />
-
-            <!-- Tài liệu học tập -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Tài liệu học tập"
-                android:textStyle="bold"
-                android:textSize="16dp"
-                android:layout_marginTop="24dp" />
-
-            <LinearLayout
-                android:id="@+id/box_pdf"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:minHeight="140dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
-                android:background="@drawable/bg_edit_text"
-                android:orientation="vertical"
-                android:padding="12dp">
-
-                <!-- Các thẻ pdf sẽ được thêm vào đây -->
-                <LinearLayout
-                    android:id="@+id/layout_ds_pdf"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical" />
-            </LinearLayout>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_them_tai_lieu"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="+ Thêm tài liệu"
-                android:textStyle="bold"
-                android:textSize="16dp"
-                android:textColor="@color/blue"
-                android:layout_marginBottom="24dp"
-                app:cornerRadius="8dp"
-                app:strokeWidth="2dp"
-                app:strokeColor="@color/blue"
-                android:backgroundTint="@android:color/white" />
-
-            <!-- Nút thêm bài học -->
             <Button
-                android:id="@+id/btn_them_bai_hoc"
+                android:id="@+id/btn_them_video_tai_lieu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Thêm bài học"
+                android:text="Thêm video, tài liệu"
                 android:textColor="@android:color/white"
                 android:backgroundTint="@color/blue"
                 android:textStyle="bold"
                 android:padding="12dp"
                 android:layout_marginTop="32dp"
-                android:textSize="24dp" />
+                android:textSize="20sp" />
+
+
+
+
         </LinearLayout>
     </ScrollView>
 

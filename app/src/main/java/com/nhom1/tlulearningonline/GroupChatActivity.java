@@ -2,17 +2,25 @@ package com.nhom1.tlulearningonline;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.fragment.app.strictmode.GetRetainInstanceUsageViolation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.android.volley.Request;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,47 +32,171 @@ public class GroupChatActivity extends AppCompatActivity {
     private List<Message> messageList;
     private MessageAdapter adapter;
     private ImageView btnBack;
+    private TextView roomStatus;
+
+    private static final String BASE_URL = "http://14.225.207.221:6060/mobile/messages";
+    private static final String USER_URL = "http://14.225.207.221:6060/mobile/users";
+    private String currentUserId;
+
+    private BottomNavigationView bottomNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group_chat);
 
+        // Trong HomeActivity.java và UserProfileActivity.java
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
+
         recyclerMessages = findViewById(R.id.recyclerMessages);
         etMessage = findViewById(R.id.etMessage);
         btnSend = findViewById(R.id.btnSend);
         btnBack = findViewById(R.id.btnBack);
+        roomStatus = findViewById(R.id.room_status);
 
         messageList = new ArrayList<>();
-        adapter = new MessageAdapter(messageList);
+        SessionManager session = new SessionManager(this);
+        currentUserId = session.getUserId();
+
+        adapter = new MessageAdapter(this, messageList, currentUserId);
         recyclerMessages.setLayoutManager(new LinearLayoutManager(this));
         recyclerMessages.setAdapter(adapter);
 
-        seedDummyMessages(); // thêm dữ liệu mẫu
+        fetchUserCount();
+        startFetchingMessagesLoop(); // Tự động lấy tin nhắn liên tục
 
         btnSend.setOnClickListener(v -> {
             String text = etMessage.getText().toString().trim();
             if (!text.isEmpty()) {
-                messageList.add(new Message("Tôi", text, true));
-                adapter.notifyItemInserted(messageList.size() - 1);
+                sendMessageToServer(currentUserId, text);
                 etMessage.setText("");
             }
         });
 
         btnBack.setOnClickListener(v -> {
-            startActivity(new Intent(GroupChatActivity.this, MainActivity.class));
-            finish(); // đóng trang chat
+            startActivity(new Intent(GroupChatActivity.this, HomeActivity.class));
+            finish();
         });
+
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                int itemId = item.getItemId();
+                if (itemId == R.id.nav_home) {
+                    Intent intent = new Intent(GroupChatActivity.this, HomeActivity.class); // Assuming student home is default
+                    // If you need to dynamically go to HomeGVActivity, you'd need role check here too
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                    // finish(); // Remove finish() here unless you explicitly want to remove the current activity from stack
+                    return true;
+                } else if (itemId == R.id.nav_forum) {
+                    Intent intent = new Intent(GroupChatActivity.this, GroupChatActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                    // finish();
+                    return true;
+                } else if (itemId == R.id.nav_courses) {
+                    Intent intent = SessionManager.getCoursesActivityIntent(GroupChatActivity.this); // Use helper
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                    // finish();
+                    return true;
+                } else if (itemId == R.id.nav_profile) {
+                    Intent intent = new Intent(GroupChatActivity.this, UserProfileActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                    // finish();
+                    return true;
+                }
+                return false;
+            }
+        });
+        bottomNavigationView.setSelectedItemId(R.id.nav_forum);
     }
 
-    private void seedDummyMessages() {
-        messageList.add(new Message("Hung Anh - 2251061782", "This is my new 3d design", false));
-        messageList.add(new Message("Hung Anh - 2251061782", "Nice a day", false));
-        messageList.add(new Message("Hung Anh - 2251061782", "Be happy life be happy ending", false));
-        messageList.add(new Message("Tôi", "You did your job well!", true));
-        messageList.add(new Message("Trung Thanh - 2251061885", "Have a great working week!!", false));
-        messageList.add(new Message("Trung Thanh - 2251061885", "Hope you like it", false));
-        messageList.add(new Message("Tôi", "Hello! Trung Thanh", true));
+    private void startFetchingMessagesLoop() {
+        fetchMessagesFromServer();
+        recyclerMessages.postDelayed(this::startFetchingMessagesLoop, 3000); // 3 giây
     }
 
+    private void fetchMessagesFromServer() {
+        JsonArrayRequest request = new JsonArrayRequest(
+                Request.Method.GET,
+                BASE_URL,
+                null,
+                response -> {
+                    try {
+                        messageList.clear();
+                        for (int i = 0; i < response.length(); i++) {
+                            JSONObject obj = response.getJSONObject(i);
+                            Message message = new Message();
+                            message.setId(obj.getString("id"));
+                            message.setSenderId(obj.getString("senderId")); // ĐÃ CÓ từ API
+                            message.setSenderName(obj.getString("senderName"));
+                            message.setSenderAvatar(obj.getString("senderAvatar"));
+                            message.setContent(obj.getString("content"));
+                            message.setCreatedAt(obj.getString("createdAt"));
+                            messageList.add(message);
+                        }
+                        adapter.notifyDataSetChanged();
+                        recyclerMessages.scrollToPosition(messageList.size() - 1);
+                    } catch (Exception e) {
+                        Log.e("FetchMessages", "JSON error: " + e.getMessage());
+                    }
+                },
+                error -> Log.e("Volley", "Fetch error: " + error.toString())
+        );
+
+        VolleySingleton.getInstance(this).addToRequestQueue(request);
+    }
+
+    private void sendMessageToServer(String senderId, String content) {
+        try {
+            JSONObject json = new JSONObject();
+            json.put("senderId", senderId);
+            json.put("content", content);
+
+            JsonObjectRequest request = new JsonObjectRequest(
+                    Request.Method.POST,
+                    BASE_URL,
+                    json,
+                    response -> {
+                        try {
+                            Message message = new Message();
+                            message.setId(response.getString("id"));
+                            message.setSenderId(senderId);
+                            message.setSenderName(response.getString("senderName"));
+                            message.setSenderAvatar(response.getString("senderAvatar"));
+                            message.setContent(response.getString("content"));
+                            message.setCreatedAt(response.getString("createdAt"));
+
+                            messageList.add(message);
+                            adapter.notifyItemInserted(messageList.size() - 1);
+                            recyclerMessages.scrollToPosition(messageList.size() - 1);
+                        } catch (Exception e) {
+                            Log.e("SendMessage", "Parse error: " + e.getMessage());
+                        }
+                    },
+                    error -> Log.e("Volley", "Send error: " + error.toString())
+            );
+
+            VolleySingleton.getInstance(this).addToRequestQueue(request);
+        } catch (Exception e) {
+            Log.e("SendMessage", "Exception: " + e.getMessage());
+        }
+    }
+    private void fetchUserCount() {
+        JsonArrayRequest request = new JsonArrayRequest(
+                Request.Method.GET,
+                USER_URL,
+                null,
+                response -> {
+                    int userCount = response.length();
+                    roomStatus.setText(userCount + " members");
+                },
+                error -> Log.e("Volley", "User count error: " + error.toString())
+        );
+
+        VolleySingleton.getInstance(this).addToRequestQueue(request);
+    }
 }

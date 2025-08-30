@@ -1,149 +1,155 @@
+// FileName: ThemBaiHocActivity.java
 package com.nhom1.tlulearningonline;
 
-import android.app.Activity;
+import android.app.Activity; // Thêm import này
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.OpenableColumns;
-import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable; // Thêm import này
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.android.volley.Request;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class ThemBaiHocActivity extends AppCompatActivity {
 
-    private static final int REQUEST_VIDEO = 100;
-    private static final int REQUEST_TAILIEU = 101;
+    private EditText edtTenBaiHoc, edtMoTaBaiHoc;
+    private Button btnThemVideoTaiLieu;
+    private BottomNavigationView bottomNavigationView;
+    private String courseId;
 
-    private EditText edtTenBaiHoc;
-    private Button btnThemVideo, btnThemTaiLieu, btnThemBaiHoc;
-    private LinearLayout layoutDsVideo, layoutDsPdf;
-
-    private final List<Uri> danhSachVideo = new ArrayList<>();
-    private final List<Uri> danhSachTaiLieu = new ArrayList<>();
+    // Thêm một request code mới để nhận diện kết quả từ ThemTaiNguyenActivity
+    private static final int REQUEST_THEM_TAI_NGUYEN = 102;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_them_bai_hoc);
 
+        courseId = getIntent().getStringExtra("course_id");
+        // Ánh xạ View
         edtTenBaiHoc = findViewById(R.id.edt_ten_bai_hoc);
-        btnThemVideo = findViewById(R.id.btn_them_video);
-        btnThemTaiLieu = findViewById(R.id.btn_them_tai_lieu);
-        btnThemBaiHoc = findViewById(R.id.btn_them_bai_hoc);
-        layoutDsVideo = findViewById(R.id.layout_ds_video);
-        layoutDsPdf = findViewById(R.id.layout_ds_pdf);
-
+        edtMoTaBaiHoc = findViewById(R.id.edt_mo_ta_bai_hoc);
+        btnThemVideoTaiLieu = findViewById(R.id.btn_them_video_tai_lieu);
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
         ImageView btnBack = findViewById(R.id.btn_back);
+
+        // Xử lý sự kiện nút quay lại
         btnBack.setOnClickListener(v -> finish());
 
-        btnThemVideo.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-            intent.setType("video/*");
-            startActivityForResult(Intent.createChooser(intent, "Chọn video"), REQUEST_VIDEO);
-        });
-
-        btnThemTaiLieu.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-            intent.setType("application/pdf");
-            startActivityForResult(Intent.createChooser(intent, "Chọn tài liệu"), REQUEST_TAILIEU);
-        });
-
-        btnThemBaiHoc.setOnClickListener(v -> {
+        // Xử lý sự kiện nút "Thêm video, tài liệu"
+        btnThemVideoTaiLieu.setOnClickListener(view -> {
             String tenBaiHoc = edtTenBaiHoc.getText().toString().trim();
+            String moTa = edtMoTaBaiHoc.getText().toString().trim();
 
             if (tenBaiHoc.isEmpty()) {
                 edtTenBaiHoc.setError("Vui lòng nhập tên bài học");
                 return;
             }
 
-            if (danhSachVideo.isEmpty()) {
-                Toast.makeText(this, "Vui lòng thêm ít nhất 1 video", Toast.LENGTH_SHORT).show();
+            if (courseId == null || courseId.isEmpty()) {
+                Toast.makeText(this, "Không tìm thấy khóa học", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            // Trả dữ liệu về cho màn Tạo khóa học
-            Intent resultIntent = new Intent();
-            resultIntent.putExtra("tenBaiHoc", tenBaiHoc);
-            resultIntent.putExtra("videoUri", danhSachVideo.get(0).toString()); // Gửi video đầu tiên
+            // Gọi API thêm bài học
+            themBaiHocVaMoThemTaiNguyen(tenBaiHoc, moTa, courseId);
+        });
 
-            StringBuilder tenTaiLieu = new StringBuilder();
-            for (Uri uri : danhSachTaiLieu) {
-                String fileName = getFileName(uri);
-                if (!fileName.isEmpty()) {
-                    tenTaiLieu.append("- ").append(fileName).append("\n");
+        // Xử lý Bottom Navigation View
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                int itemId = item.getItemId();
+                if (itemId == R.id.nav_home) {
+                    Intent intent = new Intent(ThemBaiHocActivity.this, HomeGVActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                    return true;
+                } else if (itemId == R.id.nav_forum) {
+                    Intent intent = new Intent(ThemBaiHocActivity.this, GroupChatActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                    return true;
+                } else if (itemId == R.id.nav_courses) {
+                    Intent intent = SessionManager.getCoursesActivityIntent(ThemBaiHocActivity.this);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                    return true;
+                } else if (itemId == R.id.nav_profile) {
+                    Intent intent = new Intent(ThemBaiHocActivity.this, UserProfileActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                    return true;
                 }
+                return false;
             }
-
-            resultIntent.putExtra("tenTaiLieu", tenTaiLieu.toString());
-            setResult(Activity.RESULT_OK, resultIntent);
-            finish();
         });
     }
 
+    // Thêm toàn bộ phương thức onActivityResult vào ThemBaiHocActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK && data != null) {
-            Uri uri = data.getData();
-            if (uri == null) return;
 
-            LayoutInflater inflater = LayoutInflater.from(this);
-            String fileName = getFileName(uri);
-
-            if (requestCode == REQUEST_VIDEO) {
-                danhSachVideo.add(uri);
-
-                View itemView = inflater.inflate(R.layout.item_video, layoutDsVideo, false);
-                TextView tvTen = itemView.findViewById(R.id.tvTenVideo);
-                ImageView btnXoa = itemView.findViewById(R.id.btnXoaVideo);
-                tvTen.setText(fileName);
-
-                btnXoa.setOnClickListener(v -> {
-                    layoutDsVideo.removeView(itemView);
-                    danhSachVideo.remove(uri);
-                });
-
-                layoutDsVideo.addView(itemView);
-
-            } else if (requestCode == REQUEST_TAILIEU) {
-                danhSachTaiLieu.add(uri);
-
-                View itemView = inflater.inflate(R.layout.item_pdf, layoutDsPdf, false);
-                TextView tvTen = itemView.findViewById(R.id.tvTenPDF);
-                ImageView btnXoa = itemView.findViewById(R.id.btnXoaPDF);
-                tvTen.setText(fileName);
-
-                btnXoa.setOnClickListener(v -> {
-                    layoutDsPdf.removeView(itemView);
-                    danhSachTaiLieu.remove(uri);
-                });
-
-                layoutDsPdf.addView(itemView);
-            }
+        // Kiểm tra xem đây có phải là kết quả trả về từ ThemTaiNguyenActivity không
+        if (requestCode == REQUEST_THEM_TAI_NGUYEN && resultCode == Activity.RESULT_OK && data != null) {
+            // Nhận được kết quả thành công, giờ đóng activity này
+            // và chuyển tiếp kết quả (data) về cho SuaKhoaHocActivity.
+            setResult(Activity.RESULT_OK, data);
+            finish();
         }
     }
 
-    private String getFileName(Uri uri) {
-        String result = "";
-        try (android.database.Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
-            if (cursor != null && cursor.moveToFirst()) {
-                int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-                if (nameIndex >= 0) {
-                    result = cursor.getString(nameIndex);
+    private void themBaiHocVaMoThemTaiNguyen(String title, String content, String courseId) {
+        String url = "http://14.225.207.221:6060/mobile/lessons";
+
+        JSONObject jsonBody = new JSONObject();
+        try {
+            jsonBody.put("title", title);
+            jsonBody.put("content", content);
+            jsonBody.put("courseId", courseId);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Lỗi tạo dữ liệu JSON", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        JsonObjectRequest request = new JsonObjectRequest(
+                Request.Method.POST,
+                url,
+                jsonBody,
+                response -> {
+                    try {
+                        String lessonId = response.getString("id");
+                        Intent intent = new Intent(ThemBaiHocActivity.this, ThemTaiNguyenActivity.class);
+                        intent.putExtra("lesson_id", lessonId);
+                        intent.putExtra("tenBaiHoc", title);
+                        intent.putExtra("moTa", content);
+                        startActivityForResult(intent, REQUEST_THEM_TAI_NGUYEN);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(this, "Không đọc được ID bài học từ phản hồi", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                error -> {
+                    error.printStackTrace();
+                    Toast.makeText(this, "Lỗi khi thêm bài học: " + error.getMessage(), Toast.LENGTH_SHORT).show();
                 }
-            }
-        }
-        return result != null ? result : "";
+        );
+
+        VolleySingleton.getInstance(this).addToRequestQueue(request);
     }
+
 }
